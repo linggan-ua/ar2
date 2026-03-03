@@ -1094,30 +1094,32 @@ let permissionCheckTimeout = null; // 新增：权限检测超时
 // ====================================================================
 // 乐器配置中心 (全局)
 // ====================================================================
+// 补充说明：为简化测试，playSounds中预留了几个由纯代码(Web Audio API)生成合成音高时的占位标识(例如不同的频率/音名)。
+// 后续如有真实音频，可以将这里的数组元素替换为真实的相对路径，例如 'assets/audio/notes/pipa_c4.mp3'。
 const instrumentConfig = {
-    'marker1':  { name: '琵琶',       model: 'assets/models/pipa.gltf',             audio: 'assets/audio/audio-pipa.mp3',             markdown: 'assets/markdown/pipa.md',             info: 'assets/info/pipa.txt',             isLoaded: false },
-    'marker2':  { name: '葫芦丝',     model: 'assets/models/hulusi.gltf',           audio: 'assets/audio/audio-hulusi.mp3',           markdown: 'assets/markdown/hulusi.md',           info: 'assets/info/hulusi.txt',           isLoaded: false },
-    'marker3':  { name: '东北大鼓',   model: 'assets/models/dongbei_dagu.gltf',     audio: 'assets/audio/audio-dongbei_dagu.mp3',     markdown: 'assets/markdown/dongbei_dagu.md',     info: 'assets/info/dongbei_dagu.txt',     isLoaded: false },
-    'marker4':  { name: '冬不拉',     model: 'assets/models/dongbula.gltf',         audio: 'assets/audio/audio-dongbula.mp3',         markdown: 'assets/markdown/dongbula.md',         info: 'assets/info/dongbula.txt',         isLoaded: false },
-    'marker5':  { name: '高胡',       model: 'assets/models/gaohu.gltf',            audio: 'assets/audio/audio-gaohu.mp3',            markdown: 'assets/markdown/gaohu.md',            info: 'assets/info/gaohu.txt',            isLoaded: false },
-    'marker6':  { name: '花鼓',       model: 'assets/models/huagu.gltf',            audio: 'assets/audio/audio-huagu.mp3',            markdown: 'assets/markdown/huagu.md',            info: 'assets/info/huagu.txt',            isLoaded: false },
-    'marker7':  { name: '火不思',     model: 'assets/models/huobusi.gltf',          audio: 'assets/audio/audio-huobusi.mp3',          markdown: 'assets/markdown/huobusi.md',          info: 'assets/info/huobusi.txt',          isLoaded: false },
-    'marker8':  { name: '马头琴',     model: 'assets/models/matouqin.gltf',         audio: 'assets/audio/audio-matouqin.mp3',         markdown: 'assets/markdown/matouqin.md',         info: 'assets/info/matouqin.txt',         isLoaded: false },
-    'marker9':  { name: '牛角琴',     model: 'assets/models/niujiaoqin.gltf',       audio: 'assets/audio/audio-niujiaoqin.mp3',       markdown: 'assets/markdown/niujiaoqin.md',       info: 'assets/info/niujiaoqin.txt',       isLoaded: false },
-    'marker10': { name: '唢呐',       model: 'assets/models/suona.gltf',            audio: 'assets/audio/audio-suona.mp3',            markdown: 'assets/markdown/suona.md',            info: 'assets/info/suona.txt',            isLoaded: false },
-    'marker11': { name: '月琴',       model: 'assets/models/yueqin.gltf',           audio: 'assets/audio/audio-yueqin.mp3',           markdown: 'assets/markdown/yueqin.md',           info: 'assets/info/yueqin.txt',           isLoaded: false },
-    'marker12': { name: '潮州唢呐',   model: 'assets/models/chaozhou_suona.gltf',   audio: 'assets/audio/audio-chaozhou_suona.mp3',   markdown: 'assets/markdown/chaozhou_suona.md',   info: 'assets/info/chaozhou_suona.txt',   isLoaded: false },
-    'marker13': { name: '潮州筝',     model: 'assets/models/chaozhou_zheng.gltf',   audio: 'assets/audio/audio-chaozhou_zheng.mp3',   markdown: 'assets/markdown/chaozhou_zheng.md',   info: 'assets/info/chaozhou_zheng.txt',   isLoaded: false },
-    'marker14': { name: '洞箫',       model: 'assets/models/dongxiao.gltf',         audio: 'assets/audio/audio-dongxiao.mp3',         markdown: 'assets/markdown/dongxiao.md',         info: 'assets/info/dongxiao.txt',         isLoaded: false },
-    'marker15': { name: '喉管',       model: 'assets/models/houguan.gltf',          audio: 'assets/audio/audio-houguan.mp3',          markdown: 'assets/markdown/houguan.md',          info: 'assets/info/houguan.txt',          isLoaded: false },
-    'marker16': { name: '木鱼',       model: 'assets/models/muyu.gltf',             audio: 'assets/audio/audio-muyu.mp3',             markdown: 'assets/markdown/muyu.md',             info: 'assets/info/muyu.txt',             isLoaded: false },
-    'marker17': { name: '牛角号',     model: 'assets/models/niujiaohao.gltf',       audio: 'assets/audio/audio-niujiaohao.mp3',       markdown: 'assets/markdown/niujiaohao.md',       info: 'assets/info/niujiaohao.txt',       isLoaded: false },
-    'marker18': { name: '秦琴',       model: 'assets/models/qinqin.gltf',           audio: 'assets/audio/audio-qinqin.mp3',           markdown: 'assets/markdown/qinqin.md',           info: 'assets/info/qinqin.txt',           isLoaded: false },
-    'marker19': { name: '椰胡',       model: 'assets/models/yehu.gltf',             audio: 'assets/audio/audio-yehu.mp3',             markdown: 'assets/markdown/yehu.md',             info: 'assets/info/yehu.txt',             isLoaded: false },
-    'marker20': { name: '渔鼓',       model: 'assets/models/yugu.gltf',             audio: 'assets/audio/audio-yugu.mp3',             markdown: 'assets/markdown/yugu.md',             info: 'assets/info/yugu.txt',             isLoaded: false },
-    'marker21': { name: '竹板',       model: 'assets/models/zhuban.gltf',           audio: 'assets/audio/audio-zhuban.mp3',           markdown: 'assets/markdown/zhuban.md',           info: 'assets/info/zhuban.txt',           isLoaded: false },
-    'marker22': { name: '花鼓大筒',   model: 'assets/models/huagudatong.gltf',      audio: 'assets/audio/audio-huagudatong.mp3',      markdown: 'assets/markdown/huagudatong.md',      info: 'assets/info/huagudatong.txt',      isLoaded: false },
-    'marker23': { name: '口鼻笛',       model: 'assets/models/koubidi.gltf',             audio: 'assets/audio/audio-koubidi.mp3',             markdown: 'assets/markdown/koubidi.md',             info: 'assets/info/koubidi.txt',             isLoaded: false },
+    'marker1':  { name: '琵琶',       model: 'assets/models/pipa.gltf',             audio: 'assets/audio/audio-pipa.mp3',             markdown: 'assets/markdown/pipa.md',             info: 'assets/info/pipa.txt',             isLoaded: false, playSounds: ['C4', 'D4', 'E4', 'F4', 'G4'] },
+    'marker2':  { name: '葫芦丝',     model: 'assets/models/hulusi.gltf',           audio: 'assets/audio/audio-hulusi.mp3',           markdown: 'assets/markdown/hulusi.md',           info: 'assets/info/hulusi.txt',           isLoaded: false, playSounds: ['C4', 'E4', 'G4'] },
+    'marker3':  { name: '东北大鼓',   model: 'assets/models/dongbei_dagu.gltf',     audio: 'assets/audio/audio-dongbei_dagu.mp3',     markdown: 'assets/markdown/dongbei_dagu.md',     info: 'assets/info/dongbei_dagu.txt',     isLoaded: false, playSounds: ['C3', 'G3'] },
+    'marker4':  { name: '冬不拉',     model: 'assets/models/dongbula.gltf',         audio: 'assets/audio/audio-dongbula.mp3',         markdown: 'assets/markdown/dongbula.md',         info: 'assets/info/dongbula.txt',         isLoaded: false, playSounds: ['A3', 'C4', 'E4', 'A4'] },
+    'marker5':  { name: '高胡',       model: 'assets/models/gaohu.gltf',            audio: 'assets/audio/audio-gaohu.mp3',            markdown: 'assets/markdown/gaohu.md',            info: 'assets/info/gaohu.txt',            isLoaded: false, playSounds: ['G4', 'D5', 'A5'] },
+    'marker6':  { name: '花鼓',       model: 'assets/models/huagu.gltf',            audio: 'assets/audio/audio-huagu.mp3',            markdown: 'assets/markdown/huagu.md',            info: 'assets/info/huagu.txt',            isLoaded: false, playSounds: ['D3', 'A3'] },
+    'marker7':  { name: '火不思',     model: 'assets/models/huobusi.gltf',          audio: 'assets/audio/audio-huobusi.mp3',          markdown: 'assets/markdown/huobusi.md',          info: 'assets/info/huobusi.txt',          isLoaded: false, playSounds: ['C4', 'D4', 'E4', 'G4'] },
+    'marker8':  { name: '马头琴',     model: 'assets/models/matouqin.gltf',         audio: 'assets/audio/audio-matouqin.mp3',         markdown: 'assets/markdown/matouqin.md',         info: 'assets/info/matouqin.txt',         isLoaded: false, playSounds: ['C3', 'G3', 'C4'] },
+    'marker9':  { name: '牛角琴',     model: 'assets/models/niujiaoqin.gltf',       audio: 'assets/audio/audio-niujiaoqin.mp3',       markdown: 'assets/markdown/niujiaoqin.md',       info: 'assets/info/niujiaoqin.txt',       isLoaded: false, playSounds: ['E3', 'A3', 'E4'] },
+    'marker10': { name: '唢呐',       model: 'assets/models/suona.gltf',            audio: 'assets/audio/audio-suona.mp3',            markdown: 'assets/markdown/suona.md',            info: 'assets/info/suona.txt',            isLoaded: false, playSounds: ['C5', 'D5', 'E5', 'G5'] },
+    'marker11': { name: '月琴',       model: 'assets/models/yueqin.gltf',           audio: 'assets/audio/audio-yueqin.mp3',           markdown: 'assets/markdown/yueqin.md',           info: 'assets/info/yueqin.txt',           isLoaded: false, playSounds: ['G3', 'C4', 'E4', 'G4'] },
+    'marker12': { name: '潮州唢呐',   model: 'assets/models/chaozhou_suona.gltf',   audio: 'assets/audio/audio-chaozhou_suona.mp3',   markdown: 'assets/markdown/chaozhou_suona.md',   info: 'assets/info/chaozhou_suona.txt',   isLoaded: false, playSounds: ['F5', 'G5', 'A5', 'C6'] },
+    'marker13': { name: '潮州筝',     model: 'assets/models/chaozhou_zheng.gltf',   audio: 'assets/audio/audio-chaozhou_zheng.mp3',   markdown: 'assets/markdown/chaozhou_zheng.md',   info: 'assets/info/chaozhou_zheng.txt',   isLoaded: false, playSounds: ['C4', 'D4', 'E4', 'G4', 'A4', 'C5'] },
+    'marker14': { name: '洞箫',       model: 'assets/models/dongxiao.gltf',         audio: 'assets/audio/audio-dongxiao.mp3',         markdown: 'assets/markdown/dongxiao.md',         info: 'assets/info/dongxiao.txt',         isLoaded: false, playSounds: ['D4', 'E4', 'G4', 'A4'] },
+    'marker15': { name: '喉管',       model: 'assets/models/houguan.gltf',          audio: 'assets/audio/audio-houguan.mp3',          markdown: 'assets/markdown/houguan.md',          info: 'assets/info/houguan.txt',          isLoaded: false, playSounds: ['A3', 'C4', 'D4'] },
+    'marker16': { name: '木鱼',       model: 'assets/models/muyu.gltf',             audio: 'assets/audio/audio-muyu.mp3',             markdown: 'assets/markdown/muyu.md',             info: 'assets/info/muyu.txt',             isLoaded: false, playSounds: ['E4'] },
+    'marker17': { name: '牛角号',     model: 'assets/models/niujiaohao.gltf',       audio: 'assets/audio/audio-niujiaohao.mp3',       markdown: 'assets/markdown/niujiaohao.md',       info: 'assets/info/niujiaohao.txt',       isLoaded: false, playSounds: ['G3', 'C4'] },
+    'marker18': { name: '秦琴',       model: 'assets/models/qinqin.gltf',           audio: 'assets/audio/audio-qinqin.mp3',           markdown: 'assets/markdown/qinqin.md',           info: 'assets/info/qinqin.txt',           isLoaded: false, playSounds: ['C4', 'E4', 'G4', 'C5'] },
+    'marker19': { name: '椰胡',       model: 'assets/models/yehu.gltf',             audio: 'assets/audio/audio-yehu.mp3',             markdown: 'assets/markdown/yehu.md',             info: 'assets/info/yehu.txt',             isLoaded: false, playSounds: ['D4', 'A4'] },
+    'marker20': { name: '渔鼓',       model: 'assets/models/yugu.gltf',             audio: 'assets/audio/audio-yugu.mp3',             markdown: 'assets/markdown/yugu.md',             info: 'assets/info/yugu.txt',             isLoaded: false, playSounds: ['C3', 'F3'] },
+    'marker21': { name: '竹板',       model: 'assets/models/zhuban.gltf',           audio: 'assets/audio/audio-zhuban.mp3',           markdown: 'assets/markdown/zhuban.md',           info: 'assets/info/zhuban.txt',           isLoaded: false, playSounds: ['A4', 'C5'] },
+    'marker22': { name: '花鼓大筒',   model: 'assets/models/huagudatong.gltf',      audio: 'assets/audio/audio-huagudatong.mp3',      markdown: 'assets/markdown/huagudatong.md',      info: 'assets/info/huagudatong.txt',      isLoaded: false, playSounds: ['G3', 'D4'] },
+    'marker23': { name: '口鼻笛',       model: 'assets/models/koubidi.gltf',             audio: 'assets/audio/audio-koubidi.mp3',             markdown: 'assets/markdown/koubidi.md',             info: 'assets/info/koubidi.txt',             isLoaded: false, playSounds: ['C5', 'D5', 'E5'] },
 };
 
 // 工具函数
@@ -1276,6 +1278,125 @@ async function fetchWithRetry(url, maxRetries = 3, retryDelay = 1000, resourceNa
     }
 }
 
+
+// ====================================================================
+// 简易电子音合成器 (用于无音频素材时的弹奏测试)
+// ====================================================================
+const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+const noteFreqs = {
+    'C3': 130.81, 'D3': 146.83, 'E3': 164.81, 'F3': 174.61, 'G3': 196.00, 'A3': 220.00, 'B3': 246.94,
+    'C4': 261.63, 'D4': 293.66, 'E4': 329.63, 'F4': 349.23, 'G4': 392.00, 'A4': 440.00, 'B4': 493.88,
+    'C5': 523.25, 'D5': 587.33, 'E5': 659.25, 'F5': 698.46, 'G5': 783.99, 'A5': 880.00, 'B5': 987.77,
+    'C6': 1046.50
+};
+
+function playSynthNote(noteName) {
+    if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+    }
+    const freq = noteFreqs[noteName] || 440;
+    
+    const oscillator = audioCtx.createOscillator();
+    const gainNode = audioCtx.createGain();
+    
+    oscillator.type = 'sine'; // 正弦波比较柔和
+    oscillator.frequency.setValueAtTime(freq, audioCtx.currentTime);
+    
+    // 包络控制 (Attack, Decay)
+    gainNode.gain.setValueAtTime(0, audioCtx.currentTime);
+    gainNode.gain.linearRampToValueAtTime(0.5, audioCtx.currentTime + 0.05); // Attack
+    gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 1.0); // Decay
+    
+    oscillator.connect(gainNode);
+    gainNode.connect(audioCtx.destination);
+    
+    oscillator.start(audioCtx.currentTime);
+    oscillator.stop(audioCtx.currentTime + 1.0);
+}
+
+// 乐器模拟弹奏组件 (instrument-player)
+AFRAME.registerComponent('instrument-player', {
+    init: function () {
+        this.markerId = this.el.parentElement.id;
+        this.config = instrumentConfig[this.markerId];
+        
+        // 绑定事件
+        this.onClick = this.onClick.bind(this);
+        this.onMouseDown = this.onMouseDown.bind(this);
+        this.onMouseUp = this.onMouseUp.bind(this);
+        
+        this.el.addEventListener('mousedown', this.onMouseDown);
+        this.el.addEventListener('mouseup', this.onMouseUp);
+        
+        this.mouseDownPos = { x: 0, y: 0 };
+    },
+    
+    onMouseDown: function (evt) {
+        if (!this.isThisMarkerActive() || !this.el.getAttribute('visible')) return;
+        if (evt.detail && evt.detail.mouseEvent) {
+            this.mouseDownPos = {
+                x: evt.detail.mouseEvent.clientX,
+                y: evt.detail.mouseEvent.clientY
+            };
+        }
+    },
+    
+    onMouseUp: function (evt) {
+        if (!this.isThisMarkerActive() || !this.el.getAttribute('visible')) return;
+        
+        let mouseUpPos = { x: 0, y: 0 };
+        if (evt.detail && evt.detail.mouseEvent) {
+            mouseUpPos = {
+                x: evt.detail.mouseEvent.clientX,
+                y: evt.detail.mouseEvent.clientY
+            };
+        }
+        
+        // 如果按下的位置和抬起的位置差别不大，视为“点击”而不是“拖拽”
+        const dx = mouseUpPos.x - this.mouseDownPos.x;
+        const dy = mouseUpPos.y - this.mouseDownPos.y;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+        
+        if (distance < 10) { // 阈值10像素
+            this.onClick(evt);
+        }
+    },
+    
+    onClick: function (evt) {
+        // 防止事件冒泡或多重触发
+        if (!this.config || !this.config.playSounds || this.config.playSounds.length === 0) return;
+        
+        // 随机选择一个音符播放
+        const sounds = this.config.playSounds;
+        const randomIndex = Math.floor(Math.random() * sounds.length);
+        const soundItem = sounds[randomIndex];
+        
+        // 由于我们在配置里存的是 'C4', 'E4' 等音名，我们调用合成器播放
+        // 如果未来换成了 mp3 路径，可在这里写 new Audio(soundItem).play()
+        playSynthNote(soundItem);
+        
+        // 可选：在界面上提示正在发声
+        console.log(`[仿真弹奏] 乐器: ${this.config.name}, 音符: ${soundItem}`);
+        
+        // 为了视觉反馈，给模型添加一个短暂的放大缩小效果
+        const currentScale = this.el.object3D.scale.clone();
+        this.el.object3D.scale.multiplyScalar(1.05);
+        setTimeout(() => {
+            if (this.el && this.el.object3D) {
+                this.el.object3D.scale.copy(currentScale);
+            }
+        }, 100);
+    },
+    
+    isThisMarkerActive: function() {
+        return currentAudioManager && currentAudioManager.markerId === this.markerId;
+    },
+    
+    remove: function () {
+        this.el.removeEventListener('mousedown', this.onMouseDown);
+        this.el.removeEventListener('mouseup', this.onMouseUp);
+    }
+});
 
 // =============== A-Frame 组件注册 ===============
 
@@ -2080,75 +2201,75 @@ document.addEventListener('DOMContentLoaded', function() {
    <!-- 所有23个Marker的完整结构 (已移除旧的 <a-torus> 加载动画) -->
    <!-- ==================================================================== -->
    <a-marker id="marker1" type="pattern" url="assets/patterns/pattern-pipa.patt" instrument-handler>
-        <a-entity id="model1" o15="x:0; y:0; z:0" position="0 0 0" scale="0.03 0.03 0.03" touch-handler visible="false"></a-entity>
+        <a-entity id="model1" class="playable" instrument-player o15="x:0; y:0; z:0" position="0 0 0" scale="0.03 0.03 0.03" touch-handler visible="false"></a-entity>
    </a-marker>
    <a-marker id="marker2" type="pattern" url="assets/patterns/pattern-hulusi.patt" instrument-handler>
-        <a-entity id="model2" o15="x:0; y:0; z:0" position="0 0 0" scale="0.014 0.014 0.014" touch-handler visible="false"></a-entity>
+        <a-entity id="model2" class="playable" instrument-player o15="x:0; y:0; z:0" position="0 0 0" scale="0.014 0.014 0.014" touch-handler visible="false"></a-entity>
    </a-marker>
    <a-marker id="marker3" type="pattern" url="assets/patterns/pattern-dongbei_dagu.patt" instrument-handler>
-        <a-entity id="model3" o15="x:0; y:0; z:0" position="0 0 0" scale="0.03 0.03 0.03" touch-handler visible="false"></a-entity>
+        <a-entity id="model3" class="playable" instrument-player o15="x:0; y:0; z:0" position="0 0 0" scale="0.03 0.03 0.03" touch-handler visible="false"></a-entity>
    </a-marker>
    <a-marker id="marker4" type="pattern" url="assets/patterns/pattern-dongbula.patt" instrument-handler>
-        <a-entity id="model4" o15="x:0; y:0; z:0" position="0 0 0" scale="0.03 0.03 0.03" touch-handler visible="false"></a-entity>
+        <a-entity id="model4" class="playable" instrument-player o15="x:0; y:0; z:0" position="0 0 0" scale="0.03 0.03 0.03" touch-handler visible="false"></a-entity>
    </a-marker>
    <a-marker id="marker5" type="pattern" url="assets/patterns/pattern-gaohu.patt" instrument-handler>
-        <a-entity id="model5" o15="x:0; y:0; z:0" position="0 0 0" scale="0.03 0.03 0.03" touch-handler visible="false"></a-entity>
+        <a-entity id="model5" class="playable" instrument-player o15="x:0; y:0; z:0" position="0 0 0" scale="0.03 0.03 0.03" touch-handler visible="false"></a-entity>
    </a-marker>
    <a-marker id="marker6" type="pattern" url="assets/patterns/pattern-huagu.patt" instrument-handler>
-        <a-entity id="model6" o15="x:0; y:0; z:0" position="0 0 0" scale="0.03 0.03 0.03" touch-handler visible="false"></a-entity>
+        <a-entity id="model6" class="playable" instrument-player o15="x:0; y:0; z:0" position="0 0 0" scale="0.03 0.03 0.03" touch-handler visible="false"></a-entity>
    </a-marker>
    <a-marker id="marker7" type="pattern" url="assets/patterns/pattern-huobusi.patt" instrument-handler>
-        <a-entity id="model7" o15="x:0; y:0; z:0" position="0 0 0" scale="0.03 0.03 0.03" touch-handler visible="false"></a-entity>
+        <a-entity id="model7" class="playable" instrument-player o15="x:0; y:0; z:0" position="0 0 0" scale="0.03 0.03 0.03" touch-handler visible="false"></a-entity>
    </a-marker>
    <a-marker id="marker8" type="pattern" url="assets/patterns/pattern-matouqin.patt" instrument-handler>
-        <a-entity id="model8" o15="x:0; y:0; z:0" position="0 0 0" scale="0.03 0.03 0.03" touch-handler visible="false"></a-entity>
+        <a-entity id="model8" class="playable" instrument-player o15="x:0; y:0; z:0" position="0 0 0" scale="0.03 0.03 0.03" touch-handler visible="false"></a-entity>
    </a-marker>
    <a-marker id="marker9" type="pattern" url="assets/patterns/pattern-niujiaoqin.patt" instrument-handler>
-        <a-entity id="model9" o15="x:0; y:0; z:0" position="0 0 0" scale="0.03 0.03 0.03" touch-handler visible="false"></a-entity>
+        <a-entity id="model9" class="playable" instrument-player o15="x:0; y:0; z:0" position="0 0 0" scale="0.03 0.03 0.03" touch-handler visible="false"></a-entity>
    </a-marker>
    <a-marker id="marker10" type="pattern" url="assets/patterns/pattern-suona.patt" instrument-handler>
-        <a-entity id="model10" o15="x:0; y:0; z:0" position="0 0 0" scale="0.03 0.03 0.03" touch-handler visible="false"></a-entity>
+        <a-entity id="model10" class="playable" instrument-player o15="x:0; y:0; z:0" position="0 0 0" scale="0.03 0.03 0.03" touch-handler visible="false"></a-entity>
    </a-marker>
    <a-marker id="marker11" type="pattern" url="assets/patterns/pattern-yueqin.patt" instrument-handler>
-        <a-entity id="model11" o15="x:0; y:0; z:0" position="0 0 0" scale="0.03 0.03 0.03" touch-handler visible="false"></a-entity>
+        <a-entity id="model11" class="playable" instrument-player o15="x:0; y:0; z:0" position="0 0 0" scale="0.03 0.03 0.03" touch-handler visible="false"></a-entity>
    </a-marker>
    <a-marker id="marker12" type="pattern" url="assets/patterns/pattern-chaozhou_suona.patt" instrument-handler>
-        <a-entity id="model12" o15="x:0; y:0; z:0" position="0 0 0" scale="0.03 0.03 0.03" touch-handler visible="false"></a-entity>
+        <a-entity id="model12" class="playable" instrument-player o15="x:0; y:0; z:0" position="0 0 0" scale="0.03 0.03 0.03" touch-handler visible="false"></a-entity>
    </a-marker>
    <a-marker id="marker13" type="pattern" url="assets/patterns/pattern-chaozhou_zheng.patt" instrument-handler>
-        <a-entity id="model13" o15="x:0; y:0; z:0" position="0 0 0" scale="0.03 0.03 0.03" touch-handler visible="false"></a-entity>
+        <a-entity id="model13" class="playable" instrument-player o15="x:0; y:0; z:0" position="0 0 0" scale="0.03 0.03 0.03" touch-handler visible="false"></a-entity>
    </a-marker>
    <a-marker id="marker14" type="pattern" url="assets/patterns/pattern-dongxiao.patt" instrument-handler>
-        <a-entity id="model14" o15="x:0; y:0; z:0" position="0 0 0" scale="0.03 0.03 0.03" touch-handler visible="false"></a-entity>
+        <a-entity id="model14" class="playable" instrument-player o15="x:0; y:0; z:0" position="0 0 0" scale="0.03 0.03 0.03" touch-handler visible="false"></a-entity>
    </a-marker>
    <a-marker id="marker15" type="pattern" url="assets/patterns/pattern-houguan.patt" instrument-handler>
-        <a-entity id="model15" o15="x:0; y:0; z:0" position="0 0 0" scale="0.03 0.03 0.03" touch-handler visible="false"></a-entity>
+        <a-entity id="model15" class="playable" instrument-player o15="x:0; y:0; z:0" position="0 0 0" scale="0.03 0.03 0.03" touch-handler visible="false"></a-entity>
    </a-marker>
    <a-marker id="marker16" type="pattern" url="assets/patterns/pattern-muyu.patt" instrument-handler>
-        <a-entity id="model16" o15="x:0; y:0; z:0" position="0 0 0" scale="0.03 0.03 0.03" touch-handler visible="false"></a-entity>
+        <a-entity id="model16" class="playable" instrument-player o15="x:0; y:0; z:0" position="0 0 0" scale="0.03 0.03 0.03" touch-handler visible="false"></a-entity>
    </a-marker>
    <a-marker id="marker17" type="pattern" url="assets/patterns/pattern-niujiaohao.patt" instrument-handler>
-        <a-entity id="model17" o15="x:0; y:0; z:0" position="0 0 0" scale="0.03 0.03 0.03" touch-handler visible="false"></a-entity>
+        <a-entity id="model17" class="playable" instrument-player o15="x:0; y:0; z:0" position="0 0 0" scale="0.03 0.03 0.03" touch-handler visible="false"></a-entity>
    </a-marker>
    <a-marker id="marker18" type="pattern" url="assets/patterns/pattern-qinqin.patt" instrument-handler>
-        <a-entity id="model18" o15="x:0; y:0; z:0" position="0 0 0" scale="0.03 0.03 0.03" touch-handler visible="false"></a-entity>
+        <a-entity id="model18" class="playable" instrument-player o15="x:0; y:0; z:0" position="0 0 0" scale="0.03 0.03 0.03" touch-handler visible="false"></a-entity>
    </a-marker>
    <a-marker id="marker19" type="pattern" url="assets/patterns/pattern-yehu.patt" instrument-handler>
-        <a-entity id="model19" o15="x:0; y:0; z:0" position="0 0 0" scale="0.03 0.03 0.03" touch-handler visible="false"></a-entity>
+        <a-entity id="model19" class="playable" instrument-player o15="x:0; y:0; z:0" position="0 0 0" scale="0.03 0.03 0.03" touch-handler visible="false"></a-entity>
    </a-marker>
    <a-marker id="marker20" type="pattern" url="assets/patterns/pattern-yugu.patt" instrument-handler>
-        <a-entity id="model20" o15="x:0; y:0; z:0" position="0 0 0" scale="0.03 0.03 0.03" touch-handler visible="false"></a-entity>
+        <a-entity id="model20" class="playable" instrument-player o15="x:0; y:0; z:0" position="0 0 0" scale="0.03 0.03 0.03" touch-handler visible="false"></a-entity>
    </a-marker>
    <a-marker id="marker21" type="pattern" url="assets/patterns/pattern-zhuban.patt" instrument-handler>
-        <a-entity id="model21" o15="x:0; y:0; z:0" position="0 0 0" scale="0.03 0.03 0.03" touch-handler visible="false"></a-entity>
+        <a-entity id="model21" class="playable" instrument-player o15="x:0; y:0; z:0" position="0 0 0" scale="0.03 0.03 0.03" touch-handler visible="false"></a-entity>
    </a-marker>
    <a-marker id="marker22" type="pattern" url="assets/patterns/pattern-huagudatong.patt" instrument-handler>
-        <a-entity id="model22" o15="x:0; y:0; z:0" position="0 0 0" scale="0.03 0.03 0.03" touch-handler visible="false"></a-entity>
+        <a-entity id="model22" class="playable" instrument-player o15="x:0; y:0; z:0" position="0 0 0" scale="0.03 0.03 0.03" touch-handler visible="false"></a-entity>
    </a-marker>
     <a-marker id="marker23" type="pattern" url="assets/patterns/pattern-koubidi.patt" instrument-handler>
-        <a-entity id="model23" o15="x:0; y:0; z:0" position="0 0 0" scale="0.03 0.03 0.03" touch-handler visible="false"></a-entity>
+        <a-entity id="model23" class="playable" instrument-player o15="x:0; y:0; z:0" position="0 0 0" scale="0.03 0.03 0.03" touch-handler visible="false"></a-entity>
    </a-marker>
-   <a-entity camera></a-entity>
+   <a-entity camera cursor="rayOrigin: mouse; fuse: false" raycaster="objects: .playable"></a-entity>
   </a-scene>
   
  </body>
