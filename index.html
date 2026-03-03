@@ -1282,7 +1282,8 @@ async function fetchWithRetry(url, maxRetries = 3, retryDelay = 1000, resourceNa
 // ====================================================================
 // 简易电子音合成器 (用于无音频素材时的弹奏测试)
 // ====================================================================
-const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+let audioCtx = null;
+let synthAudioUnlocked = false;
 const noteFreqs = {
     'C3': 130.81, 'D3': 146.83, 'E3': 164.81, 'F3': 174.61, 'G3': 196.00, 'A3': 220.00, 'B3': 246.94,
     'C4': 261.63, 'D4': 293.66, 'E4': 329.63, 'F4': 349.23, 'G4': 392.00, 'A4': 440.00, 'B4': 493.88,
@@ -1290,28 +1291,66 @@ const noteFreqs = {
     'C6': 1046.50
 };
 
-function playSynthNote(noteName) {
-    if (audioCtx.state === 'suspended') {
-        audioCtx.resume();
+function ensureAudioContext() {
+    if (!audioCtx) {
+        const Ctx = window.AudioContext || window.webkitAudioContext;
+        if (!Ctx) return null;
+        audioCtx = new Ctx();
     }
+    return audioCtx;
+}
+
+async function unlockSynthAudio() {
+    const ctx = ensureAudioContext();
+    if (!ctx) return false;
+
+    try {
+        if (ctx.state !== 'running') {
+            await ctx.resume();
+        }
+
+        // 主动播放一段几乎无感知的超短静音包络，兼容部分移动端解锁策略
+        const oscillator = ctx.createOscillator();
+        const gainNode = ctx.createGain();
+        gainNode.gain.setValueAtTime(0.0001, ctx.currentTime);
+        oscillator.connect(gainNode);
+        gainNode.connect(ctx.destination);
+        oscillator.start(ctx.currentTime);
+        oscillator.stop(ctx.currentTime + 0.01);
+
+        synthAudioUnlocked = true;
+        return true;
+    } catch (err) {
+        console.warn('unlockSynthAudio failed:', err);
+        return false;
+    }
+}
+
+async function playSynthNote(noteName) {
+    const unlocked = await unlockSynthAudio();
+    if (!unlocked || !audioCtx) {
+        showNotification('⚠️ 音频未解锁，请再次点击模型或检查静音模式', true);
+        return;
+    }
+
     const freq = noteFreqs[noteName] || 440;
-    
+    const now = audioCtx.currentTime;
     const oscillator = audioCtx.createOscillator();
     const gainNode = audioCtx.createGain();
-    
+
     oscillator.type = 'sine'; // 正弦波比较柔和
-    oscillator.frequency.setValueAtTime(freq, audioCtx.currentTime);
-    
+    oscillator.frequency.setValueAtTime(freq, now);
+
     // 包络控制 (Attack, Decay)
-    gainNode.gain.setValueAtTime(0, audioCtx.currentTime);
-    gainNode.gain.linearRampToValueAtTime(0.5, audioCtx.currentTime + 0.05); // Attack
-    gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 1.0); // Decay
-    
+    gainNode.gain.setValueAtTime(0.0001, now);
+    gainNode.gain.linearRampToValueAtTime(0.35, now + 0.02); // Attack
+    gainNode.gain.exponentialRampToValueAtTime(0.001, now + 0.45); // Decay
+
     oscillator.connect(gainNode);
     gainNode.connect(audioCtx.destination);
-    
-    oscillator.start(audioCtx.currentTime);
-    oscillator.stop(audioCtx.currentTime + 1.0);
+
+    oscillator.start(now);
+    oscillator.stop(now + 0.5);
 }
 
 // 乐器模拟弹奏组件 (instrument-player)
@@ -1362,7 +1401,7 @@ AFRAME.registerComponent('instrument-player', {
         }
     },
     
-    onClick: function (evt) {
+    onClick: async function (evt) {
         // 防止事件冒泡或多重触发
         if (!this.config || !this.config.playSounds || this.config.playSounds.length === 0) return;
         
@@ -1373,7 +1412,7 @@ AFRAME.registerComponent('instrument-player', {
         
         // 由于我们在配置里存的是 'C4', 'E4' 等音名，我们调用合成器播放
         // 如果未来换成了 mp3 路径，可在这里写 new Audio(soundItem).play()
-        playSynthNote(soundItem);
+        await playSynthNote(soundItem);
         
         // 可选：在界面上提示正在发声
         console.log(`[仿真弹奏] 乐器: ${this.config.name}, 音符: ${soundItem}`);
@@ -1982,6 +2021,9 @@ async function startAR() {
         return;
     }
     
+    // 在用户手势上下文中提前解锁合成音，提升移动端发声成功率
+    await unlockSynthAudio();
+
     // 权限正常，启动AR
     isARStarted = true;
     startOverlay.classList.add('hidden');
