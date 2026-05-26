@@ -1120,6 +1120,8 @@ const instrumentConfig = {
     'marker21': { name: '竹板',       model: 'assets/models/zhuban.gltf',           audio: 'assets/audio/audio-zhuban.mp3',           markdown: 'assets/markdown/zhuban.md',           info: 'assets/info/zhuban.txt',           isLoaded: false, playSounds: ['A4', 'C5'] },
     'marker22': { name: '花鼓大筒',   model: 'assets/models/huagudatong.gltf',      audio: 'assets/audio/audio-huagudatong.mp3',      markdown: 'assets/markdown/huagudatong.md',      info: 'assets/info/huagudatong.txt',      isLoaded: false, playSounds: ['G3', 'D4'] },
     'marker23': { name: '口鼻笛',       model: 'assets/models/koubidi.gltf',             audio: 'assets/audio/audio-koubidi.mp3',             markdown: 'assets/markdown/koubidi.md',             info: 'assets/info/koubidi.txt',             isLoaded: false, playSounds: ['C5', 'D5', 'E5'] },
+    'marker24': { name: '扬琴',       model: 'assets/models/yangqin.glb',            audio: '',                                      markdown: 'assets/markdown/yangqin.md',          info: 'assets/info/yangqin.txt',          isLoaded: false, playSounds: ['C4', 'D4', 'E4', 'G4', 'A4', 'C5'] },
+    'marker25': { name: '三弦',       model: 'assets/models/sanxian.glb',            audio: '',                                      markdown: 'assets/markdown/sanxian.md',          info: 'assets/info/sanxian.txt',          isLoaded: false, playSounds: ['G3', 'C4', 'D4', 'G4'] },
 };
 
 // 工具函数
@@ -2310,6 +2312,12 @@ document.addEventListener('DOMContentLoaded', function() {
    </a-marker>
     <a-marker id="marker23" type="pattern" url="assets/patterns/pattern-koubidi.patt" instrument-handler>
         <a-entity id="model23" class="playable" instrument-player o15="x:0; y:0; z:0" position="0 0 0" scale="0.03 0.03 0.03" touch-handler visible="false"></a-entity>
+   </a-marker>
+   <a-marker id="marker24" type="pattern" url="assets/patterns/pattern-yangqin.patt" instrument-handler>
+        <a-entity id="model24" class="playable" instrument-player o15="x:0; y:0; z:0" position="0 0 0" scale="0.03 0.03 0.03" touch-handler visible="false"></a-entity>
+   </a-marker>
+   <a-marker id="marker25" type="pattern" url="assets/patterns/pattern-sanxian.patt" instrument-handler>
+        <a-entity id="model25" class="playable" instrument-player o15="x:0; y:0; z:0" position="0 0 0" scale="0.03 0.03 0.03" touch-handler visible="false"></a-entity>
    </a-marker>
    <a-entity camera cursor="rayOrigin: mouse; fuse: false" raycaster="objects: .playable"></a-entity>
   </a-scene>
