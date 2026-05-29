@@ -2737,9 +2737,14 @@ AFRAME.registerComponent('runtime-synth-workstation', {
         if (!camera) return null;
         const canvas = scene.canvas;
         const rect = canvas.getBoundingClientRect();
-        this.mouse.x = ((pointer.x - rect.left) / rect.width) * 2 - 1;
-        this.mouse.y = -((pointer.y - rect.top) / rect.height) * 2 + 1;
-        this.raycaster.setFromCamera(this.mouse, camera);
+        const ndc = new THREE.Vector3(
+            ((pointer.x - rect.left) / rect.width) * 2 - 1,
+            -((pointer.y - rect.top) / rect.height) * 2 + 1,
+            0.5
+        );
+        ndc.unproject(camera);
+        this.raycaster.ray.origin.setFromMatrixPosition(camera.matrixWorld);
+        this.raycaster.ray.direction.copy(ndc).sub(this.raycaster.ray.origin).normalize();
         this.el.object3D.updateMatrixWorld();
         const hits = this.raycaster.intersectObjects(this.interactives, true);
         for (let i = 0; i < hits.length; i++) {
@@ -3151,9 +3156,14 @@ AFRAME.registerComponent('runtime-drum-machine', {
         if (!camera) return null;
         const canvas = scene.canvas;
         const rect = canvas.getBoundingClientRect();
-        this.mouse.x = ((pointer.x - rect.left) / rect.width) * 2 - 1;
-        this.mouse.y = -((pointer.y - rect.top) / rect.height) * 2 + 1;
-        this.raycaster.setFromCamera(this.mouse, camera);
+        const ndc = new THREE.Vector3(
+            ((pointer.x - rect.left) / rect.width) * 2 - 1,
+            -((pointer.y - rect.top) / rect.height) * 2 + 1,
+            0.5
+        );
+        ndc.unproject(camera);
+        this.raycaster.ray.origin.setFromMatrixPosition(camera.matrixWorld);
+        this.raycaster.ray.direction.copy(ndc).sub(this.raycaster.ray.origin).normalize();
         this.el.object3D.updateMatrixWorld();
         const hits = this.raycaster.intersectObjects(this.interactives, true);
         for (let i = 0; i < hits.length; i++) {
