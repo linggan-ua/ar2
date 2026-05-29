@@ -2732,18 +2732,20 @@ AFRAME.registerComponent('runtime-synth-workstation', {
 
     raycastInteractives: function (evt) {
         const pointer = getRuntimeEventPointer(evt);
-        const camera = this.el.sceneEl.camera;
+        const scene = this.el.sceneEl;
+        const camera = scene.camera;
         if (!camera) return null;
-        const canvas = this.el.sceneEl.canvas;
+        const canvas = scene.canvas;
         const rect = canvas.getBoundingClientRect();
         this.mouse.x = ((pointer.x - rect.left) / rect.width) * 2 - 1;
         this.mouse.y = -((pointer.y - rect.top) / rect.height) * 2 + 1;
         this.raycaster.setFromCamera(this.mouse, camera);
-        const hits = this.raycaster.intersectObjects(this.interactives, false);
-        if (hits.length > 0) {
-            const obj = hits[0].object;
+        this.el.object3D.updateMatrixWorld();
+        const hits = this.raycaster.intersectObjects(this.interactives, true);
+        for (let i = 0; i < hits.length; i++) {
+            const obj = hits[i].object;
             const interaction = obj.userData && obj.userData.interaction;
-            if (interaction) return { object: obj, interaction: interaction, point: hits[0].point };
+            if (interaction) return { object: obj, interaction: interaction, point: hits[i].point };
         }
         return null;
     },
@@ -3144,18 +3146,20 @@ AFRAME.registerComponent('runtime-drum-machine', {
 
     raycastInteractives: function (evt) {
         const pointer = getRuntimeEventPointer(evt);
-        const camera = this.el.sceneEl.camera;
+        const scene = this.el.sceneEl;
+        const camera = scene.camera;
         if (!camera) return null;
-        const canvas = this.el.sceneEl.canvas;
+        const canvas = scene.canvas;
         const rect = canvas.getBoundingClientRect();
         this.mouse.x = ((pointer.x - rect.left) / rect.width) * 2 - 1;
         this.mouse.y = -((pointer.y - rect.top) / rect.height) * 2 + 1;
         this.raycaster.setFromCamera(this.mouse, camera);
-        const hits = this.raycaster.intersectObjects(this.interactives, false);
-        if (hits.length > 0) {
-            const obj = hits[0].object;
+        this.el.object3D.updateMatrixWorld();
+        const hits = this.raycaster.intersectObjects(this.interactives, true);
+        for (let i = 0; i < hits.length; i++) {
+            const obj = hits[i].object;
             const interaction = obj.userData && obj.userData.interaction;
-            if (interaction) return { object: obj, interaction: interaction, point: hits[0].point };
+            if (interaction) return { object: obj, interaction: interaction, point: hits[i].point };
         }
         return null;
     },
