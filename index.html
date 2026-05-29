@@ -1511,12 +1511,6 @@ function getRuntimePointerId(evt) {
     return source.pointerId || touch?.identifier || 1;
 }
 
-function getRuntimeInteractionFromEvent(evt) {
-    const object = evt.detail && evt.detail.intersection && evt.detail.intersection.object;
-    const interaction = object && object.userData && object.userData.interaction;
-    return { object, interaction };
-}
-
 function ensureAudio() {
     if (audioCtx) return audioCtx;
     const Ctx = window.AudioContext || window.webkitAudioContext;
@@ -2348,14 +2342,16 @@ AFRAME.registerComponent('runtime-synth-workstation', {
         this.activeKeys = new Map();
         this.dragState = null;
         this.pointerHandledUntil = 0;
+        this.raycaster = new THREE.Raycaster();
+        this.mouse = new THREE.Vector2();
         this.handleClick = this.handleClick.bind(this);
         this.handlePointerDown = this.handlePointerDown.bind(this);
         this.handlePointerMove = this.handlePointerMove.bind(this);
         this.handlePointerUp = this.handlePointerUp.bind(this);
         this.el.classList.add('playable');
-        this.el.addEventListener('mousedown', this.handlePointerDown);
-        this.el.addEventListener('touchstart', this.handlePointerDown);
-        this.el.addEventListener('click', this.handleClick);
+        document.addEventListener('mousedown', this.handlePointerDown);
+        document.addEventListener('touchstart', this.handlePointerDown, { passive: false });
+        document.addEventListener('click', this.handleClick);
         document.addEventListener('mousemove', this.handlePointerMove);
         document.addEventListener('touchmove', this.handlePointerMove, { passive: false });
         document.addEventListener('mouseup', this.handlePointerUp);
@@ -2734,10 +2730,27 @@ AFRAME.registerComponent('runtime-synth-workstation', {
         }
     },
 
+    raycastInteractives: function (evt) {
+        const pointer = getRuntimeEventPointer(evt);
+        const camera = this.el.sceneEl.camera;
+        if (!camera) return null;
+        this.mouse.x = (pointer.x / window.innerWidth) * 2 - 1;
+        this.mouse.y = -(pointer.y / window.innerHeight) * 2 + 1;
+        this.raycaster.setFromCamera(this.mouse, camera);
+        const hits = this.raycaster.intersectObjects(this.interactives, false);
+        if (hits.length > 0) {
+            const obj = hits[0].object;
+            const interaction = obj.userData && obj.userData.interaction;
+            if (interaction) return { object: obj, interaction: interaction, point: hits[0].point };
+        }
+        return null;
+    },
+
     handlePointerDown: function (evt) {
         if (modelGestureMode !== 'interact') return;
-        const { object, interaction } = getRuntimeInteractionFromEvent(evt);
-        if (!interaction) return;
+        const hit = this.raycastInteractives(evt);
+        if (!hit) return;
+        const { object, interaction } = hit;
         evt.stopPropagation();
         if (evt.preventDefault) evt.preventDefault();
         runtimeControlPointerActive = true;
@@ -2807,9 +2820,9 @@ AFRAME.registerComponent('runtime-synth-workstation', {
     handleClick: function (evt) {
         if (modelGestureMode !== 'interact') return;
         if (Date.now() < this.pointerHandledUntil) return;
-        const object = evt.detail && evt.detail.intersection && evt.detail.intersection.object;
-        const interaction = object && object.userData && object.userData.interaction;
-        if (!interaction) return;
+        const hit = this.raycastInteractives(evt);
+        if (!hit) return;
+        const { object, interaction } = hit;
         evt.stopPropagation();
         if (interaction.kind === 'preset') return this.selectPreset(interaction.id);
         if (interaction.kind === 'wave') return this.selectWave(interaction.id);
@@ -2860,9 +2873,9 @@ AFRAME.registerComponent('runtime-synth-workstation', {
     },
 
     remove: function () {
-        this.el.removeEventListener('mousedown', this.handlePointerDown);
-        this.el.removeEventListener('touchstart', this.handlePointerDown);
-        this.el.removeEventListener('click', this.handleClick);
+        document.removeEventListener('mousedown', this.handlePointerDown);
+        document.removeEventListener('touchstart', this.handlePointerDown);
+        document.removeEventListener('click', this.handleClick);
         document.removeEventListener('mousemove', this.handlePointerMove);
         document.removeEventListener('touchmove', this.handlePointerMove);
         document.removeEventListener('mouseup', this.handlePointerUp);
@@ -2880,14 +2893,16 @@ AFRAME.registerComponent('runtime-drum-machine', {
         this.activePressMesh = null;
         this.dragState = null;
         this.pointerHandledUntil = 0;
+        this.raycaster = new THREE.Raycaster();
+        this.mouse = new THREE.Vector2();
         this.handleClick = this.handleClick.bind(this);
         this.handlePointerDown = this.handlePointerDown.bind(this);
         this.handlePointerMove = this.handlePointerMove.bind(this);
         this.handlePointerUp = this.handlePointerUp.bind(this);
         this.el.classList.add('playable');
-        this.el.addEventListener('mousedown', this.handlePointerDown);
-        this.el.addEventListener('touchstart', this.handlePointerDown);
-        this.el.addEventListener('click', this.handleClick);
+        document.addEventListener('mousedown', this.handlePointerDown);
+        document.addEventListener('touchstart', this.handlePointerDown, { passive: false });
+        document.addEventListener('click', this.handleClick);
         document.addEventListener('mousemove', this.handlePointerMove);
         document.addEventListener('touchmove', this.handlePointerMove, { passive: false });
         document.addEventListener('mouseup', this.handlePointerUp);
@@ -3122,10 +3137,27 @@ AFRAME.registerComponent('runtime-drum-machine', {
         if (knob && knob.value >= 0.98) this.updateContinuousControl(interaction, -0.94);
     },
 
+    raycastInteractives: function (evt) {
+        const pointer = getRuntimeEventPointer(evt);
+        const camera = this.el.sceneEl.camera;
+        if (!camera) return null;
+        this.mouse.x = (pointer.x / window.innerWidth) * 2 - 1;
+        this.mouse.y = -(pointer.y / window.innerHeight) * 2 + 1;
+        this.raycaster.setFromCamera(this.mouse, camera);
+        const hits = this.raycaster.intersectObjects(this.interactives, false);
+        if (hits.length > 0) {
+            const obj = hits[0].object;
+            const interaction = obj.userData && obj.userData.interaction;
+            if (interaction) return { object: obj, interaction: interaction, point: hits[0].point };
+        }
+        return null;
+    },
+
     handlePointerDown: function (evt) {
         if (modelGestureMode !== 'interact') return;
-        const { object, interaction } = getRuntimeInteractionFromEvent(evt);
-        if (!interaction) return;
+        const hit = this.raycastInteractives(evt);
+        if (!hit) return;
+        const { object, interaction } = hit;
         evt.stopPropagation();
         if (evt.preventDefault) evt.preventDefault();
         runtimeControlPointerActive = true;
@@ -3187,9 +3219,9 @@ AFRAME.registerComponent('runtime-drum-machine', {
     handleClick: function (evt) {
         if (modelGestureMode !== 'interact') return;
         if (Date.now() < this.pointerHandledUntil) return;
-        const object = evt.detail && evt.detail.intersection && evt.detail.intersection.object;
-        const interaction = object && object.userData && object.userData.interaction;
-        if (!interaction) return;
+        const hit = this.raycastInteractives(evt);
+        if (!hit) return;
+        const { object, interaction } = hit;
         evt.stopPropagation();
         if (interaction.kind === 'drumPad') {
             flashRuntimeMesh(object, true, 0.018);
@@ -3223,9 +3255,9 @@ AFRAME.registerComponent('runtime-drum-machine', {
 
     remove: function () {
         this.stopPattern();
-        this.el.removeEventListener('mousedown', this.handlePointerDown);
-        this.el.removeEventListener('touchstart', this.handlePointerDown);
-        this.el.removeEventListener('click', this.handleClick);
+        document.removeEventListener('mousedown', this.handlePointerDown);
+        document.removeEventListener('touchstart', this.handlePointerDown);
+        document.removeEventListener('click', this.handleClick);
         document.removeEventListener('mousemove', this.handlePointerMove);
         document.removeEventListener('touchmove', this.handlePointerMove);
         document.removeEventListener('mouseup', this.handlePointerUp);
