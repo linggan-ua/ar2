@@ -2349,8 +2349,9 @@ AFRAME.registerComponent('runtime-synth-workstation', {
         this.handlePointerMove = this.handlePointerMove.bind(this);
         this.handlePointerUp = this.handlePointerUp.bind(this);
         this.el.classList.add('playable');
-        this.el.addEventListener('mousedown', this.handlePointerDown);
-        this.el.addEventListener('click', this.handleClick);
+        document.addEventListener('mousedown', this.handlePointerDown);
+        document.addEventListener('touchstart', this.handlePointerDown, { passive: false });
+        document.addEventListener('click', this.handleClick);
         document.addEventListener('mousemove', this.handlePointerMove);
         document.addEventListener('touchmove', this.handlePointerMove, { passive: false });
         document.addEventListener('mouseup', this.handlePointerUp);
@@ -2750,8 +2751,9 @@ AFRAME.registerComponent('runtime-synth-workstation', {
     handlePointerDown: function (evt) {
         if (!this.el.getAttribute('visible')) return;
         if (modelGestureMode !== 'interact') return;
+        if (!this.raycaster || !this.mouse) { console.warn('raycaster/mouse not ready'); return; }
         const hit = this.raycastInteractives(evt);
-        if (!hit) return;
+        if (!hit) { console.log('no hit ndc:', this.mouse.x.toFixed(2), this.mouse.y.toFixed(2), 'interactives:', this.interactives.length); return; }
         const { object, interaction } = hit;
         evt.stopPropagation();
         if (evt.preventDefault) evt.preventDefault();
@@ -2877,8 +2879,9 @@ AFRAME.registerComponent('runtime-synth-workstation', {
     },
 
     remove: function () {
-        this.el.removeEventListener('mousedown', this.handlePointerDown);
-        this.el.removeEventListener('click', this.handleClick);
+        document.removeEventListener('mousedown', this.handlePointerDown);
+        document.removeEventListener('touchstart', this.handlePointerDown);
+        document.removeEventListener('click', this.handleClick);
         document.removeEventListener('mousemove', this.handlePointerMove);
         document.removeEventListener('touchmove', this.handlePointerMove);
         document.removeEventListener('mouseup', this.handlePointerUp);
@@ -2903,8 +2906,9 @@ AFRAME.registerComponent('runtime-drum-machine', {
         this.handlePointerMove = this.handlePointerMove.bind(this);
         this.handlePointerUp = this.handlePointerUp.bind(this);
         this.el.classList.add('playable');
-        this.el.addEventListener('mousedown', this.handlePointerDown);
-        this.el.addEventListener('click', this.handleClick);
+        document.addEventListener('mousedown', this.handlePointerDown);
+        document.addEventListener('touchstart', this.handlePointerDown, { passive: false });
+        document.addEventListener('click', this.handleClick);
         document.addEventListener('mousemove', this.handlePointerMove);
         document.addEventListener('touchmove', this.handlePointerMove, { passive: false });
         document.addEventListener('mouseup', this.handlePointerUp);
@@ -3159,8 +3163,9 @@ AFRAME.registerComponent('runtime-drum-machine', {
     handlePointerDown: function (evt) {
         if (!this.el.getAttribute('visible')) return;
         if (modelGestureMode !== 'interact') return;
+        if (!this.raycaster || !this.mouse) { console.warn('raycaster/mouse not ready'); return; }
         const hit = this.raycastInteractives(evt);
-        if (!hit) return;
+        if (!hit) { console.log('no hit ndc:', this.mouse.x.toFixed(2), this.mouse.y.toFixed(2), 'interactives:', this.interactives.length); return; }
         const { object, interaction } = hit;
         evt.stopPropagation();
         if (evt.preventDefault) evt.preventDefault();
@@ -3261,8 +3266,9 @@ AFRAME.registerComponent('runtime-drum-machine', {
 
     remove: function () {
         this.stopPattern();
-        this.el.removeEventListener('mousedown', this.handlePointerDown);
-        this.el.removeEventListener('click', this.handleClick);
+        document.removeEventListener('mousedown', this.handlePointerDown);
+        document.removeEventListener('touchstart', this.handlePointerDown);
+        document.removeEventListener('click', this.handleClick);
         document.removeEventListener('mousemove', this.handlePointerMove);
         document.removeEventListener('touchmove', this.handlePointerMove);
         document.removeEventListener('mouseup', this.handlePointerUp);
