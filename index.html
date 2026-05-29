@@ -662,6 +662,26 @@
                 inset 0 1px 0 rgba(255, 255, 255, 0.7),
                 inset 0 -1px 0 rgba(255, 255, 255, 0.3);
         }
+
+        #mode-btn.interact-mode {
+            background: linear-gradient(135deg, 
+                rgba(76, 175, 80, 0.92) 0%,
+                rgba(76, 175, 80, 0.72) 50%,
+                rgba(76, 175, 80, 0.98) 100%),
+                linear-gradient(45deg, 
+                rgba(255, 255, 255, 0.2),
+                rgba(255, 255, 255, 0.12));
+        }
+
+        #mode-btn.rotate-mode {
+            background: linear-gradient(135deg, 
+                rgba(126, 87, 194, 0.92) 0%,
+                rgba(126, 87, 194, 0.72) 50%,
+                rgba(126, 87, 194, 0.98) 100%),
+                linear-gradient(45deg, 
+                rgba(255, 255, 255, 0.2),
+                rgba(255, 255, 255, 0.12));
+        }
         
         .dock-button.disabled {
             background: linear-gradient(135deg, 
@@ -1092,36 +1112,11 @@ let isAudioReloading = false; // 新增：防止重复触发音频重载
 let permissionCheckTimeout = null; // 新增：权限检测超时
 
 // ====================================================================
-// 乐器配置中心 (全局)
+// AR 合成器/鼓机平台配置
 // ====================================================================
-// 补充说明：为简化测试，playSounds中预留了几个由纯代码(Web Audio API)生成合成音高时的占位标识(例如不同的频率/音名)。
-// 后续如有真实音频，可以将这里的数组元素替换为真实的相对路径，例如 'assets/audio/notes/pipa_c4.mp3'。
 const instrumentConfig = {
-    'marker1':  { name: '琵琶',       model: 'assets/models/pipa.gltf',             audio: 'assets/audio/audio-pipa.mp3',             markdown: 'assets/markdown/pipa.md',             info: 'assets/info/pipa.txt',             isLoaded: false, playSounds: ['C4', 'D4', 'E4', 'F4', 'G4'] },
-    'marker2':  { name: '葫芦丝',     model: 'assets/models/hulusi.gltf',           audio: 'assets/audio/audio-hulusi.mp3',           markdown: 'assets/markdown/hulusi.md',           info: 'assets/info/hulusi.txt',           isLoaded: false, playSounds: ['C4', 'E4', 'G4'] },
-    'marker3':  { name: '东北大鼓',   model: 'assets/models/dongbei_dagu.gltf',     audio: 'assets/audio/audio-dongbei_dagu.mp3',     markdown: 'assets/markdown/dongbei_dagu.md',     info: 'assets/info/dongbei_dagu.txt',     isLoaded: false, playSounds: ['C3', 'G3'] },
-    'marker4':  { name: '冬不拉',     model: 'assets/models/dongbula.gltf',         audio: 'assets/audio/audio-dongbula.mp3',         markdown: 'assets/markdown/dongbula.md',         info: 'assets/info/dongbula.txt',         isLoaded: false, playSounds: ['A3', 'C4', 'E4', 'A4'] },
-    'marker5':  { name: '高胡',       model: 'assets/models/gaohu.gltf',            audio: 'assets/audio/audio-gaohu.mp3',            markdown: 'assets/markdown/gaohu.md',            info: 'assets/info/gaohu.txt',            isLoaded: false, playSounds: ['G4', 'D5', 'A5'] },
-    'marker6':  { name: '花鼓',       model: 'assets/models/huagu.gltf',            audio: 'assets/audio/audio-huagu.mp3',            markdown: 'assets/markdown/huagu.md',            info: 'assets/info/huagu.txt',            isLoaded: false, playSounds: ['D3', 'A3'] },
-    'marker7':  { name: '火不思',     model: 'assets/models/huobusi.gltf',          audio: 'assets/audio/audio-huobusi.mp3',          markdown: 'assets/markdown/huobusi.md',          info: 'assets/info/huobusi.txt',          isLoaded: false, playSounds: ['C4', 'D4', 'E4', 'G4'] },
-    'marker8':  { name: '马头琴',     model: 'assets/models/matouqin.gltf',         audio: 'assets/audio/audio-matouqin.mp3',         markdown: 'assets/markdown/matouqin.md',         info: 'assets/info/matouqin.txt',         isLoaded: false, playSounds: ['C3', 'G3', 'C4'] },
-    'marker9':  { name: '牛角琴',     model: 'assets/models/niujiaoqin.gltf',       audio: 'assets/audio/audio-niujiaoqin.mp3',       markdown: 'assets/markdown/niujiaoqin.md',       info: 'assets/info/niujiaoqin.txt',       isLoaded: false, playSounds: ['E3', 'A3', 'E4'] },
-    'marker10': { name: '唢呐',       model: 'assets/models/suona.gltf',            audio: 'assets/audio/audio-suona.mp3',            markdown: 'assets/markdown/suona.md',            info: 'assets/info/suona.txt',            isLoaded: false, playSounds: ['C5', 'D5', 'E5', 'G5'] },
-    'marker11': { name: '月琴',       model: 'assets/models/yueqin.gltf',           audio: 'assets/audio/audio-yueqin.mp3',           markdown: 'assets/markdown/yueqin.md',           info: 'assets/info/yueqin.txt',           isLoaded: false, playSounds: ['G3', 'C4', 'E4', 'G4'] },
-    'marker12': { name: '潮州唢呐',   model: 'assets/models/chaozhou_suona.gltf',   audio: 'assets/audio/audio-chaozhou_suona.mp3',   markdown: 'assets/markdown/chaozhou_suona.md',   info: 'assets/info/chaozhou_suona.txt',   isLoaded: false, playSounds: ['F5', 'G5', 'A5', 'C6'] },
-    'marker13': { name: '潮州筝',     model: 'assets/models/chaozhou_zheng.gltf',   audio: 'assets/audio/audio-chaozhou_zheng.mp3',   markdown: 'assets/markdown/chaozhou_zheng.md',   info: 'assets/info/chaozhou_zheng.txt',   isLoaded: false, playSounds: ['C4', 'D4', 'E4', 'G4', 'A4', 'C5'] },
-    'marker14': { name: '洞箫',       model: 'assets/models/dongxiao.gltf',         audio: 'assets/audio/audio-dongxiao.mp3',         markdown: 'assets/markdown/dongxiao.md',         info: 'assets/info/dongxiao.txt',         isLoaded: false, playSounds: ['D4', 'E4', 'G4', 'A4'] },
-    'marker15': { name: '喉管',       model: 'assets/models/houguan.gltf',          audio: 'assets/audio/audio-houguan.mp3',          markdown: 'assets/markdown/houguan.md',          info: 'assets/info/houguan.txt',          isLoaded: false, playSounds: ['A3', 'C4', 'D4'] },
-    'marker16': { name: '木鱼',       model: 'assets/models/muyu.gltf',             audio: 'assets/audio/audio-muyu.mp3',             markdown: 'assets/markdown/muyu.md',             info: 'assets/info/muyu.txt',             isLoaded: false, playSounds: ['E4'] },
-    'marker17': { name: '牛角号',     model: 'assets/models/niujiaohao.gltf',       audio: 'assets/audio/audio-niujiaohao.mp3',       markdown: 'assets/markdown/niujiaohao.md',       info: 'assets/info/niujiaohao.txt',       isLoaded: false, playSounds: ['G3', 'C4'] },
-    'marker18': { name: '秦琴',       model: 'assets/models/qinqin.gltf',           audio: 'assets/audio/audio-qinqin.mp3',           markdown: 'assets/markdown/qinqin.md',           info: 'assets/info/qinqin.txt',           isLoaded: false, playSounds: ['C4', 'E4', 'G4', 'C5'] },
-    'marker19': { name: '椰胡',       model: 'assets/models/yehu.gltf',             audio: 'assets/audio/audio-yehu.mp3',             markdown: 'assets/markdown/yehu.md',             info: 'assets/info/yehu.txt',             isLoaded: false, playSounds: ['D4', 'A4'] },
-    'marker20': { name: '渔鼓',       model: 'assets/models/yugu.gltf',             audio: 'assets/audio/audio-yugu.mp3',             markdown: 'assets/markdown/yugu.md',             info: 'assets/info/yugu.txt',             isLoaded: false, playSounds: ['C3', 'F3'] },
-    'marker21': { name: '竹板',       model: 'assets/models/zhuban.gltf',           audio: 'assets/audio/audio-zhuban.mp3',           markdown: 'assets/markdown/zhuban.md',           info: 'assets/info/zhuban.txt',           isLoaded: false, playSounds: ['A4', 'C5'] },
-    'marker22': { name: '花鼓大筒',   model: 'assets/models/huagudatong.gltf',      audio: 'assets/audio/audio-huagudatong.mp3',      markdown: 'assets/markdown/huagudatong.md',      info: 'assets/info/huagudatong.txt',      isLoaded: false, playSounds: ['G3', 'D4'] },
-    'marker23': { name: '口鼻笛',       model: 'assets/models/koubidi.gltf',             audio: 'assets/audio/audio-koubidi.mp3',             markdown: 'assets/markdown/koubidi.md',             info: 'assets/info/koubidi.txt',             isLoaded: false, playSounds: ['C5', 'D5', 'E5'] },
-    'marker24': { name: '扬琴',       model: 'assets/models/yangqin.glb',            audio: '',                                      markdown: 'assets/markdown/yangqin.md',          info: 'assets/info/yangqin.txt',          isLoaded: false, playSounds: ['C4', 'D4', 'E4', 'G4', 'A4', 'C5'] },
-    'marker25': { name: '三弦',       model: 'assets/models/sanxian.glb',            audio: '',                                      markdown: 'assets/markdown/sanxian.md',          info: 'assets/info/sanxian.txt',          isLoaded: false, playSounds: ['G3', 'C4', 'D4', 'G4'] },
+    'marker26': { name: '合成器',     model: 'runtime:synth-workstation',            audio: '', markdown: 'assets/markdown/synth_workstation.md', info: 'assets/info/synth_workstation.txt', isLoaded: false, playSounds: ['C4', 'E4', 'G4', 'C5'] },
+    'marker27': { name: '鼓机',       model: 'runtime:drum-machine',                 audio: '', markdown: 'assets/markdown/drum_machine.md',      info: 'assets/info/drum_machine.txt',      isLoaded: false, playSounds: ['C3', 'D3', 'G3'] }
 };
 
 // 工具函数
@@ -1284,76 +1279,1959 @@ async function fetchWithRetry(url, maxRetries = 3, retryDelay = 1000, resourceNa
 // ====================================================================
 // 简易电子音合成器 (用于无音频素材时的弹奏测试)
 // ====================================================================
-let audioCtx = null;
-let synthAudioUnlocked = false;
-const noteFreqs = {
-    'C3': 130.81, 'D3': 146.83, 'E3': 164.81, 'F3': 174.61, 'G3': 196.00, 'A3': 220.00, 'B3': 246.94,
-    'C4': 261.63, 'D4': 293.66, 'E4': 329.63, 'F4': 349.23, 'G4': 392.00, 'A4': 440.00, 'B4': 493.88,
-    'C5': 523.25, 'D5': 587.33, 'E5': 659.25, 'F5': 698.46, 'G5': 783.99, 'A5': 880.00, 'B5': 987.77,
-    'C6': 1046.50
+const PRESETS = {
+    SYNTH: { color: 0x3aa6ff, mode: "synth" },
+    GUITAR: { color: 0x39e59f, mode: "guitar" },
+    DRUM: { color: 0xffa23a, mode: "drum" },
+    BASS: { color: 0xb26bff, mode: "bass" }
 };
 
-function ensureAudioContext() {
-    if (!audioCtx) {
-        const Ctx = window.AudioContext || window.webkitAudioContext;
-        if (!Ctx) return null;
-        audioCtx = new Ctx();
+const WAVES = {
+    SAW: { color: 0x3aa6ff, osc: "sawtooth" },
+    SQUARE: { color: 0xb26bff, osc: "square" },
+    SINE: { color: 0x39e59f, osc: "sine" }
+};
+
+const FADERS = [
+    { id: "A", label: "A", value: 0.05, color: 0x3aa6ff },
+    { id: "D", label: "D", value: 0.28, color: 0x3aa6ff },
+    { id: "S", label: "S", value: 0.62, color: 0x3aa6ff },
+    { id: "R", label: "R", value: 0.30, color: 0x3aa6ff },
+    { id: "FX", label: "FX", value: 0.22, color: 0xb26bff },
+    { id: "VOL", label: "VOL", value: 0.82, color: 0x39e59f }
+];
+
+const PERFORMANCE_BUTTONS = ["GLIDE", "ARP", "HOLD"];
+const NOTE_NAMES = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
+const WHITE_PCS = new Set([0, 2, 4, 5, 7, 9, 11]);
+const BUILD_ID = "20260529-no-access-v1";
+const MIN_SYNTH_NOTE_HOLD_MS = 230;
+const MIN_BASS_NOTE_HOLD_MS = 280;
+const ORIGINAL_GUITAR_PARAMS = {
+    style: "folk",
+    attack: 0.002,
+    decay: 0.05,
+    sustain: 0.62,
+    release: 2.2,
+    cutoff: 0.48,
+    brightness: 0.9982,
+    drive: 1.0,
+    body: 0.52,
+    reverb: 0.24,
+    chorus: 0.06,
+    vibrato: 0.02,
+    stringType: "steel"
+};
+const GUITAR_CONTROL_DEFAULTS = {
+    cutoff: 0.62,
+    fx: 0.22
+};
+const GUITE222_GUITAR_WORKLET_URL = new URL(`./assets/guitar-worklet.js?v=${BUILD_ID}`, window.location.href);
+const GUITE222_GUITAR_PARAMS = {
+    attack: 0.002,
+    decay: 0.06,
+    sustain: 0.55,
+    release: 2.5,
+    cutoff: 0.45,
+    brightness: 0.9985
+};
+const GUITE222_BASE_FREQ = 82.41;
+const GUITE222_BASE_MIDI = 48;
+const DRUM_CONTROLS = {
+    tone: 0.62,
+    decay: 0.52,
+    drive: 0.25,
+    space: 0.35,
+    level: 0.82
+};
+
+const state = {
+    currentMode: "synth",
+    currentPreset: "SYNTH",
+    currentWave: "SAW",
+    octaveShift: 0,
+    cutoff: 0.62,
+    reso: 0.28,
+    pitchBend: 0,
+    mod: 0,
+    glide: false,
+    arp: false,
+    hold: false,
+    faders: Object.fromEntries(FADERS.map((item) => [item.id, item.value])),
+    lastFreq: null
+};
+
+let runtimeControlPointerActive = false;
+let modelGestureMode = 'rotate';
+let audioCtx = null;
+let audioUnlocked = false;
+let masterGain = null;
+let fxSend = null;
+let delayNode = null;
+let delayFeedback = null;
+let guitarReverbSend = null;
+let guitarReverbConvolver = null;
+let guitarReverbGain = null;
+let guite222GuitarNode = null;
+let guite222GuitarReady = null;
+let guite222GuitarFailed = false;
+let activePointers = new Map();
+let drumControls = { ...DRUM_CONTROLS };
+
+function isRuntimeInstrumentConfig(config) {
+    return Boolean(config && config.model && config.model.startsWith('runtime:'));
+}
+
+function getDefaultGestureMode(config) {
+    return isRuntimeInstrumentConfig(config) ? 'interact' : 'rotate';
+}
+
+const runtimeSynthState = {
+    get preset() { return state.currentPreset; },
+    set preset(value) { state.currentPreset = value; },
+    get mode() { return state.currentMode; },
+    set mode(value) { state.currentMode = value; },
+    get waveId() { return state.currentWave; },
+    set waveId(value) { state.currentWave = value; },
+    get wave() { return WAVES[state.currentWave]?.osc || WAVES.SAW.osc; },
+    set wave(value) {
+        const match = Object.entries(WAVES).find(([, wave]) => wave.osc === value);
+        if (match) state.currentWave = match[0];
+    },
+    get octaveShift() { return state.octaveShift; },
+    set octaveShift(value) { state.octaveShift = value; },
+    get cutoff() { return state.cutoff; },
+    set cutoff(value) { state.cutoff = value; },
+    get reso() { return state.reso; },
+    set reso(value) { state.reso = value; },
+    get pitch() { return state.pitchBend / 2 + 0.5; },
+    set pitch(value) { state.pitchBend = (value - 0.5) * 2; },
+    get mod() { return state.mod; },
+    set mod(value) { state.mod = value; },
+    get glide() { return state.glide; },
+    set glide(value) { state.glide = value; },
+    get arp() { return state.arp; },
+    set arp(value) { state.arp = value; },
+    get hold() { return state.hold; },
+    set hold(value) { state.hold = value; },
+    get faders() { return state.faders; }
+};
+
+const runtimeDrumState = drumControls;
+
+const runtimePresets = Object.fromEntries(
+    Object.entries(PRESETS).map(([key, value]) => [key, { color: `#${value.color.toString(16).padStart(6, '0')}`, mode: value.mode }])
+);
+
+const runtimeWaves = Object.fromEntries(
+    Object.entries(WAVES).map(([key, value]) => [key, { color: `#${value.color.toString(16).padStart(6, '0')}`, osc: value.osc }])
+);
+
+function makeRuntimeMaterial({ color, emissive = 0x000000, roughness = 0.62, metalness = 0.1, transparent = false, opacity = 1 }) {
+    return new THREE.MeshStandardMaterial({
+        color,
+        emissive,
+        emissiveIntensity: emissive ? 0.4 : 0,
+        roughness,
+        metalness,
+        transparent,
+        opacity
+    });
+}
+
+function runtimeLabelTexture(lines, options = {}) {
+    const width = options.width || 256;
+    const height = options.height || 96;
+    const canvas = document.createElement('canvas');
+    canvas.width = width;
+    canvas.height = height;
+    const ctx = canvas.getContext('2d');
+    ctx.clearRect(0, 0, width, height);
+    if (options.background) {
+        ctx.fillStyle = options.background;
+        ctx.fillRect(0, 0, width, height);
     }
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillStyle = options.color || '#f6fff8';
+    const list = Array.isArray(lines) ? lines : [lines];
+    const fontSize = options.fontSize || (list.length > 1 ? 26 : 34);
+    ctx.font = `800 ${fontSize}px Arial, PingFang SC, Microsoft YaHei, sans-serif`;
+    const step = height / (list.length + 1);
+    list.forEach((line, index) => ctx.fillText(line, width / 2, step * (index + 1)));
+    const texture = new THREE.CanvasTexture(canvas);
+    if ('SRGBColorSpace' in THREE) texture.colorSpace = THREE.SRGBColorSpace;
+    return texture;
+}
+
+function addRuntimeMeshLabel(parent, text, x, y, z, w, h, options = {}) {
+    const mat = new THREE.MeshBasicMaterial({
+        map: runtimeLabelTexture(text, options),
+        transparent: true,
+        depthWrite: false
+    });
+    const mesh = new THREE.Mesh(new THREE.PlaneGeometry(w, h), mat);
+    mesh.position.set(x, y, z);
+    parent.add(mesh);
+    return mesh;
+}
+
+function setRuntimeButtonActive(mesh, active, color) {
+    if (!mesh) return;
+    mesh.userData.isActive = active;
+    mesh.material.color.setHex(active ? color : mesh.userData.baseColor);
+    mesh.material.emissive.setHex(active ? color : 0x000000);
+    mesh.material.emissiveIntensity = active ? 0.8 : 0.04;
+}
+
+function flashRuntimeMesh(mesh, active, pressDepth = 0.025) {
+    if (!mesh || !mesh.userData || mesh.userData.baseColor === undefined) return;
+    mesh.position.z = active ? mesh.userData.baseZ - pressDepth : mesh.userData.baseZ;
+    mesh.material.color.setHex(active ? mesh.userData.activeColor : mesh.userData.baseColor);
+    mesh.material.emissive.setHex(active ? mesh.userData.activeColor : 0x000000);
+    mesh.material.emissiveIntensity = active ? 0.55 : 0.05;
+}
+
+function clampRuntimeValue(value, min = 0, max = 1) {
+    return Math.max(min, Math.min(max, value));
+}
+
+function getRuntimeEventPointer(evt) {
+    const source = (evt.detail && (evt.detail.mouseEvent || evt.detail.touchEvent)) || evt;
+    const touch = source.touches && source.touches[0] || source.changedTouches && source.changedTouches[0];
+    return {
+        x: touch ? touch.clientX : source.clientX || 0,
+        y: touch ? touch.clientY : source.clientY || 0
+    };
+}
+
+function getRuntimePointerId(evt) {
+    const source = (evt.detail && (evt.detail.mouseEvent || evt.detail.touchEvent)) || evt;
+    const touch = source.touches && source.touches[0] || source.changedTouches && source.changedTouches[0];
+    return source.pointerId || touch?.identifier || 1;
+}
+
+function getRuntimeInteractionFromEvent(evt) {
+    const object = evt.detail && evt.detail.intersection && evt.detail.intersection.object;
+    const interaction = object && object.userData && object.userData.interaction;
+    return { object, interaction };
+}
+
+function ensureAudio() {
+    if (audioCtx) return audioCtx;
+    const Ctx = window.AudioContext || window.webkitAudioContext;
+    if (!Ctx) {
+        showNotification('当前浏览器不支持 Web Audio', true);
+        return null;
+    }
+
+    audioCtx = new Ctx({ latencyHint: "interactive" });
+    if (navigator.audioSession) {
+        try { navigator.audioSession.type = "playback"; } catch (err) {}
+    }
+
+    masterGain = audioCtx.createGain();
+    masterGain.gain.value = state.faders.VOL;
+
+    const compressor = audioCtx.createDynamicsCompressor();
+    compressor.threshold.value = -18;
+    compressor.knee.value = 22;
+    compressor.ratio.value = 5;
+    compressor.attack.value = 0.006;
+    compressor.release.value = 0.18;
+    masterGain.connect(compressor);
+    compressor.connect(audioCtx.destination);
+
+    fxSend = audioCtx.createGain();
+    fxSend.gain.value = state.faders.FX * 0.34;
+    delayNode = audioCtx.createDelay(0.9);
+    delayNode.delayTime.value = 0.22;
+    delayFeedback = audioCtx.createGain();
+    delayFeedback.gain.value = 0.18;
+    fxSend.connect(delayNode);
+    delayNode.connect(delayFeedback);
+    delayFeedback.connect(delayNode);
+    delayNode.connect(compressor);
+
+    guitarReverbSend = audioCtx.createGain();
+    guitarReverbConvolver = audioCtx.createConvolver();
+    guitarReverbGain = audioCtx.createGain();
+    guitarReverbConvolver.buffer = createImpulseResponse(audioCtx, 1.45, 2.4);
+    guitarReverbGain.gain.value = getOriginalGuitarParams().reverb * 0.36;
+    guitarReverbSend.connect(guitarReverbConvolver);
+    guitarReverbConvolver.connect(guitarReverbGain);
+    guitarReverbGain.connect(masterGain);
+    queueGuite222GuitarWorkletLoad();
     return audioCtx;
 }
 
-async function unlockSynthAudio() {
-    const ctx = ensureAudioContext();
-    if (!ctx) return false;
-
-    try {
-        if (ctx.state !== 'running') {
-            await ctx.resume();
+function createImpulseResponse(ctx, duration, decay) {
+    const len = Math.max(1, Math.floor(ctx.sampleRate * duration));
+    const buffer = ctx.createBuffer(2, len, ctx.sampleRate);
+    for (let channel = 0; channel < 2; channel++) {
+        const data = buffer.getChannelData(channel);
+        for (let i = 0; i < len; i++) {
+            const t = i / len;
+            data[i] = (Math.random() * 2 - 1) * Math.pow(1 - t, decay) * 0.35;
         }
+    }
+    return buffer;
+}
 
-        // 主动播放一段几乎无感知的超短静音包络，兼容部分移动端解锁策略
-        const oscillator = ctx.createOscillator();
-        const gainNode = ctx.createGain();
-        gainNode.gain.setValueAtTime(0.0001, ctx.currentTime);
-        oscillator.connect(gainNode);
-        gainNode.connect(ctx.destination);
-        oscillator.start(ctx.currentTime);
-        oscillator.stop(ctx.currentTime + 0.01);
+function unlockAudio() {
+    const ctx = ensureAudio();
+    if (!ctx) return;
+    try {
+        if (ctx.state === "suspended") {
+            ctx.resume().catch(() => showNotification('请再次点击启动声音', true));
+        }
+        if (audioUnlocked) return;
+        const buffer = ctx.createBuffer(1, 1, ctx.sampleRate);
+        const source = ctx.createBufferSource();
+        source.buffer = buffer;
+        source.connect(ctx.destination);
+        source.start(0);
+        audioUnlocked = true;
+    } catch (err) {}
+}
 
-        synthAudioUnlocked = true;
-        return true;
-    } catch (err) {
-        console.warn('unlockSynthAudio failed:', err);
-        return false;
+async function unlockSynthAudio() {
+    unlockAudio();
+    if (audioCtx && audioCtx.state === 'suspended') await audioCtx.resume().catch(() => {});
+    return Boolean(audioCtx);
+}
+
+function resetAudioForPreset(id) {
+    const ctx = ensureAudio();
+    if (!ctx) return;
+    if (ctx.state === "suspended") ctx.resume().catch(() => {});
+    cancelActiveControlPointers();
+    state.lastFreq = null;
+    const now = ctx.currentTime;
+    masterGain?.gain.cancelScheduledValues(now);
+    masterGain?.gain.setTargetAtTime(state.faders.VOL, now, 0.015);
+    fxSend?.gain.cancelScheduledValues(now);
+    fxSend?.gain.setTargetAtTime(state.faders.FX * 0.34, now, 0.015);
+    if (guitarReverbGain) {
+        const reverb = id === "GUITAR" ? getOriginalGuitarParams().reverb * 0.36 : 0;
+        guitarReverbGain.gain.cancelScheduledValues(now);
+        guitarReverbGain.gain.setTargetAtTime(reverb, now, 0.02);
     }
 }
 
-async function playSynthNote(noteName) {
-    const unlocked = await unlockSynthAudio();
-    if (!unlocked || !audioCtx) {
-        showNotification('⚠️ 音频未解锁，请再次点击模型或检查静音模式', true);
+function midiToFrequency(midi) {
+    return 440 * Math.pow(2, (midi - 69 + state.pitchBend * 2) / 12);
+}
+
+function getAdsr() {
+    return {
+        attack: 0.004 + state.faders.A * 0.72,
+        decay: 0.035 + state.faders.D * 0.9,
+        sustain: clampRuntimeValue(state.faders.S, 0.08, 0.92),
+        release: 0.04 + state.faders.R * 1.8
+    };
+}
+
+function makeNoiseBuffer(ctx, duration = 0.7) {
+    const length = Math.max(1, Math.floor(ctx.sampleRate * duration));
+    const buffer = ctx.createBuffer(1, length, ctx.sampleRate);
+    const data = buffer.getChannelData(0);
+    for (let i = 0; i < length; i++) {
+        data[i] = Math.random() * 2 - 1;
+    }
+    return buffer;
+}
+
+function applyVoiceEnvelope(gain, velocity, sustainMultiplier = 1) {
+    const ctx = audioCtx;
+    const adsr = getAdsr();
+    const now = ctx.currentTime;
+    const peak = clampRuntimeValue(velocity * state.faders.VOL, 0.001, 0.95);
+    gain.gain.cancelScheduledValues(now);
+    gain.gain.setValueAtTime(0.0001, now);
+    gain.gain.linearRampToValueAtTime(peak, now + adsr.attack);
+    gain.gain.setTargetAtTime(peak * adsr.sustain * sustainMultiplier, now + adsr.attack, adsr.decay / 3);
+}
+
+function routeVoice(source, filter, gain) {
+    source.connect(filter);
+    filter.connect(gain);
+    gain.connect(masterGain);
+    gain.connect(fxSend);
+}
+
+function createSynthVoice(midi, velocity = 0.78, options = {}) {
+    const ctx = ensureAudio();
+    if (!ctx) return null;
+    if (ctx.state === "suspended") ctx.resume().catch(() => {});
+
+    const now = ctx.currentTime;
+    const freq = midiToFrequency(midi + (options.bass ? -12 : 0));
+    const wave = options.wave || WAVES[state.currentWave].osc;
+    const filter = ctx.createBiquadFilter();
+    filter.type = "lowpass";
+    filter.frequency.value = 180 + Math.pow(state.cutoff, 1.4) * (options.bass ? 3600 : 11800);
+    filter.Q.value = 0.7 + state.reso * 12;
+
+    const gain = ctx.createGain();
+    gain.gain.value = 0.0001;
+
+    let source;
+    let oscillator = null;
+    if (wave === "noise") {
+        source = ctx.createBufferSource();
+        source.buffer = makeNoiseBuffer(ctx, 1.4);
+    } else {
+        source = ctx.createOscillator();
+        oscillator = source;
+        source.type = wave;
+        if (state.glide && state.lastFreq) {
+            source.frequency.setValueAtTime(state.lastFreq, now);
+            source.frequency.exponentialRampToValueAtTime(Math.max(20, freq), now + 0.11);
+        } else {
+            source.frequency.value = freq;
+        }
+        source.detune.value = state.pitchBend * 200;
+        if (state.mod > 0.02) {
+            const lfo = ctx.createOscillator();
+            const lfoGain = ctx.createGain();
+            lfo.frequency.value = 4.5 + state.mod * 5;
+            lfoGain.gain.value = state.mod * (options.bass ? 10 : 24);
+            lfo.connect(lfoGain);
+            lfoGain.connect(source.detune);
+            lfo.start(now);
+            window.setTimeout(() => {
+                try { lfo.stop(); lfo.disconnect(); lfoGain.disconnect(); } catch (err) {}
+            }, 2600);
+        }
+    }
+
+    applyVoiceEnvelope(gain, velocity, options.bass ? 0.8 : 1);
+    routeVoice(source, filter, gain);
+    source.start(now);
+
+    const voice = {
+        source,
+        oscillator,
+        gain,
+        filter,
+        startedAt: now,
+        minHoldUntil: now + ((options.bass ? MIN_BASS_NOTE_HOLD_MS : MIN_SYNTH_NOTE_HOLD_MS) / 1000),
+        released: false,
+        releaseTimer: 0
+    };
+    state.lastFreq = freq;
+    return voice;
+}
+
+function noteNameToMidi(note = "C4") {
+    if (typeof note === "number" && Number.isFinite(note)) return note;
+    const match = String(note).trim().match(/^([A-Ga-g])([#b]?)(-?\d+)$/);
+    if (!match) return 60;
+    const base = { C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11 }[match[1].toUpperCase()];
+    const accidental = match[2] === "#" ? 1 : match[2] === "b" ? -1 : 0;
+    const octave = Number(match[3]);
+    return (octave + 1) * 12 + base + accidental;
+}
+
+function releaseVoice(voice, options = {}) {
+    if (!voice || !audioCtx || voice.released) return;
+    const now = audioCtx.currentTime;
+    const wait = options.force ? 0 : Math.max(0, (voice.minHoldUntil || now) - now);
+    if (wait <= 0.005) {
+        noteOff(voice, options);
+        return;
+    }
+    if (voice.releaseTimer) return;
+    voice.releaseTimer = window.setTimeout(() => {
+        voice.releaseTimer = 0;
+        noteOff(voice, options);
+    }, wait * 1000);
+}
+
+function noteOff(voice, options = {}) {
+    if (!voice || !audioCtx) return;
+    if (voice.released) return;
+    voice.released = true;
+    if (voice.releaseTimer) {
+        window.clearTimeout(voice.releaseTimer);
+        voice.releaseTimer = 0;
+    }
+    const adsr = getAdsr();
+    const now = audioCtx.currentTime;
+    const release = options.force ? 0.035 : (state.hold ? Math.max(adsr.release, 1.0) : adsr.release);
+    try {
+        voice.gain.gain.cancelScheduledValues(now);
+        voice.gain.gain.setTargetAtTime(0.0001, now, release / 4);
+        voice.source.stop(now + release + 0.08);
+    } catch (err) {}
+    window.setTimeout(() => {
+        try {
+            voice.source.disconnect();
+            voice.filter.disconnect();
+            voice.gain.disconnect();
+        } catch (err) {}
+    }, (release + 0.2) * 1000);
+}
+
+function createPluckVoice(midi, velocity = 0.78) {
+    playGuite222GuitarNote(midi, velocity);
+    return null;
+}
+
+function queueGuite222GuitarWorkletLoad() {
+    if (!audioCtx || guite222GuitarNode || guite222GuitarReady || guite222GuitarFailed) return guite222GuitarReady;
+    if (!audioCtx.audioWorklet || typeof AudioWorkletNode === "undefined") {
+        guite222GuitarFailed = true;
+        return null;
+    }
+
+    guite222GuitarReady = audioCtx.audioWorklet
+        .addModule(GUITE222_GUITAR_WORKLET_URL.href)
+        .then(() => {
+            guite222GuitarNode = new AudioWorkletNode(audioCtx, "guitar-processor");
+            guite222GuitarNode.connect(masterGain);
+            return guite222GuitarNode;
+        })
+        .catch((err) => {
+            guite222GuitarFailed = true;
+            console.warn("guite222 guitar worklet failed", err);
+            return null;
+        });
+
+    return guite222GuitarReady;
+}
+
+function playGuite222GuitarNote(midi, velocity = 0.85) {
+    const ctx = ensureAudio();
+    if (!ctx) return;
+    if (ctx.state === "suspended") ctx.resume().catch(() => {});
+
+    const freq = guite222FrequencyForMidi(midi);
+    const message = {
+        type: "pluck",
+        freq,
+        velocity: 0.85,
+        params: getGuite222GuitarParams()
+    };
+
+    if (guite222GuitarNode) {
+        guite222GuitarNode.port.postMessage(message);
         return;
     }
 
-    const freq = noteFreqs[noteName] || 440;
-    const now = audioCtx.currentTime;
-    const oscillator = audioCtx.createOscillator();
-    const gainNode = audioCtx.createGain();
+    const ready = queueGuite222GuitarWorkletLoad();
+    if (ready) {
+        ready.then((node) => {
+            if (node) node.port.postMessage(message);
+            else playGuite222FallbackNote(freq, velocity);
+        });
+        return;
+    }
 
-    oscillator.type = 'sine'; // 正弦波比较柔和
-    oscillator.frequency.setValueAtTime(freq, now);
-
-    // 包络控制 (Attack, Decay)
-    gainNode.gain.setValueAtTime(0.0001, now);
-    gainNode.gain.linearRampToValueAtTime(0.35, now + 0.02); // Attack
-    gainNode.gain.exponentialRampToValueAtTime(0.001, now + 0.45); // Decay
-
-    oscillator.connect(gainNode);
-    gainNode.connect(audioCtx.destination);
-
-    oscillator.start(now);
-    oscillator.stop(now + 0.5);
+    playGuite222FallbackNote(freq, velocity);
 }
+
+function getGuite222GuitarParams() {
+    return { ...GUITE222_GUITAR_PARAMS };
+}
+
+function guite222FrequencyForMidi(midi) {
+    return GUITE222_BASE_FREQ * Math.pow(2, (midi - GUITE222_BASE_MIDI) / 12);
+}
+
+function playGuite222FallbackNote(freq, velocity = 0.85) {
+    const ctx = ensureAudio();
+    if (!ctx || !freq) return;
+    const params = getGuite222GuitarParams();
+    const buffer = synthesizeGuite222FallbackBuffer(ctx, freq, velocity, params);
+    const source = ctx.createBufferSource();
+    const gain = ctx.createGain();
+    const now = ctx.currentTime;
+    source.buffer = buffer;
+    gain.gain.value = 0.9;
+    source.connect(gain);
+    gain.connect(masterGain);
+    source.start(now);
+    source.stop(now + buffer.duration);
+}
+
+function synthesizeGuite222FallbackBuffer(ctx, freq, velocity, params) {
+    const sampleRate = ctx.sampleRate;
+    const size = clampRuntimeValue(Math.round(sampleRate / freq), 8, 2400);
+    const duration = 3.5;
+    const length = Math.max(size + 2, Math.floor(sampleRate * duration));
+    const buffer = ctx.createBuffer(1, length, sampleRate);
+    const out = buffer.getChannelData(0);
+    const delay = new Float32Array(size);
+
+    for (let i = 0; i < size; i++) {
+        let n = (Math.random() * 2 - 1) * velocity;
+        if (i > 1) n = delay[i - 2] * 0.15 + delay[i - 1] * 0.55 + n * 0.30;
+        delay[i] = n;
+    }
+
+    let pos = 0;
+    let amp = 0;
+    let phase = "attack";
+    let lp1 = 0;
+    const dt = 1 / sampleRate;
+    for (let i = 0; i < length; i++) {
+        let env = 0;
+        if (phase === "attack") {
+            amp += dt / params.attack;
+            if (amp >= 1) {
+                amp = 1;
+                phase = "decay";
+            }
+            env = amp;
+        } else if (phase === "decay") {
+            amp -= dt / params.decay * (1 - params.sustain);
+            if (amp <= params.sustain) {
+                amp = params.sustain;
+                phase = "sustain";
+            }
+            env = amp;
+        } else {
+            env = params.sustain;
+        }
+
+        const next = (pos + 1) % size;
+        let ks = (delay[pos] + delay[next]) * 0.5 * params.brightness;
+        lp1 += params.cutoff * (ks - lp1);
+        delay[pos] = lp1;
+        pos = next;
+        out[i] = Math.tanh(lp1 * env * 0.45);
+    }
+
+    return buffer;
+}
+
+function playOriginalGuitarNote(midi, velocity = 0.78) {
+    const ctx = ensureAudio();
+    if (!ctx) return null;
+    if (ctx.state === "suspended") ctx.resume().catch(() => {});
+    const freq = midiToFrequency(midi);
+    const params = getOriginalGuitarParams();
+    const buffer = synthesizeOriginalGuitarBuffer(ctx, freq, velocity, params);
+    const source = ctx.createBufferSource();
+    source.buffer = buffer;
+
+    const filter = ctx.createBiquadFilter();
+    filter.type = "lowpass";
+    filter.frequency.value = clampRuntimeValue(900 + params.cutoff * 5200 + params.body * 700, 650, 7600);
+    filter.Q.value = 0.65 + params.body * 1.1;
+
+    const gain = ctx.createGain();
+    const pan = ctx.createStereoPanner ? ctx.createStereoPanner() : null;
+    const now = ctx.currentTime;
+    const release = Math.max(0.08, params.release * 0.32);
+    const peak = clampRuntimeValue(velocity, 0.05, 0.95);
+
+    gain.gain.setValueAtTime(0.0001, now);
+    gain.gain.exponentialRampToValueAtTime(Math.max(0.001, peak), now + Math.max(0.002, params.attack));
+    gain.gain.setTargetAtTime(peak * params.sustain, now + params.attack + params.decay, Math.max(0.025, params.decay));
+    gain.gain.setTargetAtTime(0.0001, now + 0.22 + params.decay, release);
+
+    const lane = guitarLaneForMidi(midi);
+    if (pan) pan.pan.value = (lane - 2.5) / 4.2;
+
+    source.connect(filter);
+    if (pan) {
+        filter.connect(pan);
+        pan.connect(gain);
+    } else {
+        filter.connect(gain);
+    }
+    gain.connect(masterGain);
+    if (guitarReverbSend) gain.connect(guitarReverbSend);
+    if (guitarReverbGain) guitarReverbGain.gain.setTargetAtTime(params.reverb * 0.36, now, 0.03);
+
+    source.start(now);
+    source.stop(now + buffer.duration + 0.05);
+    source.onended = () => {
+        try {
+            source.disconnect();
+            filter.disconnect();
+            gain.disconnect();
+            pan?.disconnect();
+        } catch (err) {}
+    };
+
+    const chorusAmount = params.chorus + (state.mod > 0.02 ? state.mod * 0.10 : 0);
+    if (chorusAmount > 0.03) {
+        window.setTimeout(() => {
+            const detune = Math.pow(2, ((Math.random() > 0.5 ? 7 : -7) * chorusAmount) / 1200);
+            playOriginalGuitarGhost(freq * detune, velocity * chorusAmount * 0.32, lane);
+        }, 16);
+    }
+
+    return null;
+}
+
+function playOriginalGuitarGhost(freq, velocity, lane) {
+    const ctx = ensureAudio();
+    if (!ctx || !freq) return;
+    const params = getOriginalGuitarParams();
+    const buffer = synthesizeOriginalGuitarBuffer(ctx, freq, velocity, params, { short: true });
+    const source = ctx.createBufferSource();
+    source.buffer = buffer;
+    const gain = ctx.createGain();
+    const pan = ctx.createStereoPanner ? ctx.createStereoPanner() : null;
+    const now = ctx.currentTime;
+
+    gain.gain.setValueAtTime(clampRuntimeValue(velocity, 0.001, 0.45), now);
+    gain.gain.setTargetAtTime(0.0001, now + 0.05, 0.22);
+    if (pan) pan.pan.value = (lane - 2.5) / 3.6;
+
+    if (pan) {
+        source.connect(pan);
+        pan.connect(gain);
+    } else {
+        source.connect(gain);
+    }
+    gain.connect(masterGain);
+    source.start(now);
+    source.stop(now + buffer.duration);
+}
+
+function getOriginalGuitarParams() {
+    const cutoffRatio = clampRuntimeValue(state.cutoff / GUITAR_CONTROL_DEFAULTS.cutoff, 0.45, 1.45);
+    const fxRatio = GUITAR_CONTROL_DEFAULTS.fx > 0
+        ? clampRuntimeValue(state.faders.FX / GUITAR_CONTROL_DEFAULTS.fx, 0, 2.4)
+        : 1;
+    return {
+        ...ORIGINAL_GUITAR_PARAMS,
+        cutoff: clampRuntimeValue(ORIGINAL_GUITAR_PARAMS.cutoff * cutoffRatio, 0.18, 0.92),
+        release: state.hold ? ORIGINAL_GUITAR_PARAMS.release * 1.28 : ORIGINAL_GUITAR_PARAMS.release,
+        reverb: clampRuntimeValue(ORIGINAL_GUITAR_PARAMS.reverb * fxRatio, 0, 0.82),
+        chorus: clampRuntimeValue(ORIGINAL_GUITAR_PARAMS.chorus + state.mod * 0.10, 0, 0.34),
+        vibrato: clampRuntimeValue(ORIGINAL_GUITAR_PARAMS.vibrato + state.mod * 0.06, 0, 0.18)
+    };
+}
+
+function synthesizeOriginalGuitarBuffer(ctx, freq, velocity, p, options = {}) {
+    const sampleRate = ctx.sampleRate;
+    const period = clampRuntimeValue(Math.round(sampleRate / freq), 8, 2400);
+    const duration = options.short ? 0.9 : clampRuntimeValue(1.7 + p.release * 0.48, 1.4, 4.4);
+    const len = Math.max(period + 4, Math.floor(sampleRate * duration));
+    const data = new Float32Array(len);
+    const stringFactor = p.stringType === "nylon" ? 0.72 : 1.0;
+    const noiseAmp = 0.58 * velocity * stringFactor;
+
+    for (let i = 0; i < period; i++) {
+        let n = (Math.random() * 2 - 1) * noiseAmp;
+        if (["folk", "classical", "bossa", "ambient"].includes(p.style) && i > 1) {
+            n = data[i - 2] * 0.16 + data[i - 1] * 0.52 + n * 0.32;
+        }
+        if (["metal", "funk"].includes(p.style)) {
+            n = Math.sign(n) * Math.min(Math.abs(n * 3.5), 1) * 0.82;
+        }
+        data[i] = n;
+    }
+
+    let lp1 = 0;
+    let lp2 = 0;
+    let hp1 = 0;
+    const decay = p.brightness;
+    const cutoff = p.cutoff;
+    const blend = cutoff * 0.45 + 0.28;
+    const vibDepth = p.vibrato * 0.004;
+
+    for (let i = period; i < len; i++) {
+        const vib = vibDepth ? Math.round(Math.sin((i / sampleRate) * Math.PI * 2 * 5.8) * vibDepth * period) : 0;
+        const read = clampRuntimeValue(i - period + vib, 0, i - 1);
+        const next = clampRuntimeValue(read + 1, 0, i - 1);
+        let ks = (data[read] * blend + data[next] * (1 - blend)) * decay;
+
+        switch (p.style) {
+            case "classical":
+                lp1 += 0.22 * (ks - lp1);
+                lp2 += 0.35 * (lp1 - lp2);
+                ks = lp2;
+                break;
+            case "jazz":
+                lp1 += 0.20 * (ks - lp1);
+                lp2 += 0.30 * (lp1 - lp2);
+                ks = lp2 * (1 + Math.sin(i / sampleRate * 3.1) * 0.012);
+                break;
+            case "blues":
+                lp1 += 0.40 * (ks - lp1);
+                lp2 += 0.15 * (lp1 - lp2);
+                ks = softDrive(lp1 * 2.5, 2.0) * 0.65 + lp2 * 0.35;
+                break;
+            case "country":
+                lp1 += 0.75 * (ks - lp1);
+                ks = lp1 * 0.45 + (lp1 - lp2) * 0.55;
+                lp2 = lp1;
+                break;
+            case "funk":
+                lp1 += 0.60 * (ks - lp1);
+                ks = softDrive(lp1 * 2.2, 1.8);
+                break;
+            case "metal":
+                lp1 += 0.85 * (ks - lp1);
+                ks = Math.max(-0.7, Math.min(0.7, lp1 * p.drive));
+                hp1 = 0.9 * (hp1 + ks - lp2);
+                lp2 = ks;
+                ks = ks * 0.48 + hp1 * 0.52;
+                break;
+            case "shoegaze":
+                lp1 += 0.55 * (ks - lp1);
+                ks = softDrive(lp1 * 3.0, 2.5) * (1 + Math.sin(i / sampleRate * 2.3) * 0.05);
+                break;
+            case "ambient":
+                lp1 += 0.18 * (ks - lp1);
+                lp2 += 0.25 * (lp1 - lp2);
+                ks = lp2 * (1 + Math.sin(i / sampleRate * 0.8) * 0.02);
+                break;
+            case "bossa":
+                lp1 += 0.28 * (ks - lp1);
+                lp2 += 0.42 * (lp1 - lp2);
+                ks = lp2 * (1 + Math.sin(i / sampleRate * 5.5) * 0.006);
+                break;
+            default:
+                lp1 += Math.max(0.18, cutoff) * (ks - lp1);
+                ks = lp1;
+        }
+
+        data[i] = ks;
+    }
+
+    if (p.body > 0) {
+        const bodyPeriod = Math.max(8, Math.round(sampleRate / (freq * 1.98)));
+        const amount = p.body * 0.15;
+        for (let i = bodyPeriod; i < len; i++) {
+            data[i] += data[i - bodyPeriod] * amount;
+        }
+    }
+
+    if (p.drive > 1.1) {
+        for (let i = 0; i < len; i++) {
+            data[i] = softDrive(data[i], p.drive);
+        }
+    }
+
+    const buffer = ctx.createBuffer(1, len, sampleRate);
+    buffer.getChannelData(0).set(data);
+    return buffer;
+}
+
+function softDrive(sample, drive) {
+    return (2 / Math.PI) * Math.atan(sample * drive) / Math.max(1, drive * 0.38);
+}
+
+function guitarLaneForMidi(midi) {
+    return clampRuntimeValue(5 - Math.floor((midi - 40) / 5), 0, 5);
+}
+
+function playDrum(id, velocity = 0.85) {
+    const ctx = ensureAudio();
+    if (!ctx) return;
+    if (ctx.state === "suspended") ctx.resume().catch(() => {});
+    if (id === "openHat") id = "hatOpen";
+    const now = ctx.currentTime;
+    const out = ctx.createGain();
+    const toneFactor = 0.62 + (1.38 - 0.62) * drumControls.tone;
+    const decayFactor = 0.62 + (1.85 - 0.62) * drumControls.decay;
+    const driveFactor = 0.9 + (1.38 - 0.9) * drumControls.drive;
+    out.gain.value = state.faders.VOL * drumControls.level * velocity * driveFactor;
+    out.connect(masterGain);
+    out.connect(fxSend);
+    if (fxSend) fxSend.gain.setTargetAtTime((state.faders.FX * 0.22) + (drumControls.space * 0.24), now, 0.015);
+
+    if (id === "kick") {
+        const osc = ctx.createOscillator();
+        osc.type = "sine";
+        osc.frequency.setValueAtTime(135 * toneFactor, now);
+        osc.frequency.exponentialRampToValueAtTime(42 * toneFactor, now + 0.18 * decayFactor);
+        out.gain.setValueAtTime(velocity, now);
+        out.gain.exponentialRampToValueAtTime(0.0001, now + 0.28 * decayFactor);
+        osc.connect(out);
+        osc.start(now);
+        osc.stop(now + 0.3 * decayFactor);
+        return;
+    }
+
+    if (id === "snare") {
+        const body = ctx.createOscillator();
+        const bodyGain = ctx.createGain();
+        body.type = "triangle";
+        body.frequency.setValueAtTime(190 * toneFactor, now);
+        body.frequency.exponentialRampToValueAtTime(118 * toneFactor, now + 0.12 * decayFactor);
+        bodyGain.gain.setValueAtTime(velocity * 0.34, now);
+        bodyGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.16 * decayFactor);
+        body.connect(bodyGain);
+        bodyGain.connect(out);
+        body.start(now);
+        body.stop(now + 0.18);
+    }
+
+    if (id === "tom") {
+        const body = ctx.createOscillator();
+        body.type = "sine";
+        body.frequency.setValueAtTime(210 * toneFactor, now);
+        body.frequency.exponentialRampToValueAtTime(86 * toneFactor, now + 0.26 * decayFactor);
+        out.gain.setValueAtTime(velocity * 0.72, now);
+        out.gain.exponentialRampToValueAtTime(0.0001, now + 0.38 * decayFactor);
+        body.connect(out);
+        body.start(now);
+        body.stop(now + 0.4 * decayFactor);
+        return;
+    }
+
+    const noise = ctx.createBufferSource();
+    noise.buffer = makeNoiseBuffer(ctx, (id === "crash" || id === "ride" ? 1.1 : 0.32) * decayFactor);
+    const filter = ctx.createBiquadFilter();
+    filter.type = id === "tom" ? "bandpass" : "highpass";
+    filter.frequency.value = {
+        snare: 1200,
+        clap: 900,
+        tom: 220,
+        hat: 5200,
+        hatOpen: 4300,
+        crash: 3100,
+        ride: 3800
+    }[id] * toneFactor || 1600 * toneFactor;
+    filter.Q.value = id === "tom" ? 5 : 0.8 + state.reso * 4;
+    out.gain.setValueAtTime(velocity * (id === "hat" ? 0.34 : 0.62), now);
+    out.gain.exponentialRampToValueAtTime(0.0001, now + (id === "crash" || id === "ride" ? 0.9 : 0.2) * decayFactor);
+    noise.connect(filter);
+    filter.connect(out);
+    noise.start(now);
+    noise.stop(now + 1.0 * decayFactor);
+}
+
+function drumForMidi(midi) {
+    const pc = ((midi % 12) + 12) % 12;
+    if (!WHITE_PCS.has(pc)) {
+        if (midi < 55) return pc === 1 ? "kick" : "snare";
+        if (midi < 64) return pc === 6 ? "tom" : "clap";
+        return pc === 10 ? "crash" : "hatOpen";
+    }
+
+    const whiteSteps = [0, 2, 4, 5, 7, 9, 11];
+    const octave = Math.floor((midi - 48) / 12);
+    const step = whiteSteps.indexOf(pc);
+    const whiteIndex = octave * 7 + step;
+    if (whiteIndex <= 2) return "kick";
+    if (whiteIndex <= 5) return "snare";
+    if (whiteIndex <= 8) return whiteIndex === 8 ? "clap" : "tom";
+    if (whiteIndex <= 11) return whiteIndex === 11 ? "hatOpen" : "hat";
+    return whiteIndex >= 14 ? "ride" : "crash";
+}
+
+function triggerByMode(midi, velocity) {
+    if (state.currentMode === "drum") {
+        playDrum(drumForMidi(midi), velocity);
+        return null;
+    }
+    if (state.currentMode === "guitar") {
+        return createPluckVoice(midi, velocity);
+    }
+    if (state.currentMode === "bass") {
+        return createSynthVoice(midi, velocity, { bass: true, wave: WAVES[state.currentWave]?.osc || WAVES.SAW.osc });
+    }
+    return createSynthVoice(midi, velocity);
+}
+
+function playKey(midi, object, pointerId = 0) {
+    unlockAudio();
+    const adjusted = midi + state.octaveShift;
+    if (object) flashRuntimeMesh(object, true);
+    updateDisplayForKey(adjusted);
+
+    if (state.arp && state.currentMode === "drum") {
+        const sequence = ["kick", "hat", "snare", "hatOpen", "tom", "crash"];
+        sequence.forEach((id, index) => {
+            window.setTimeout(() => {
+                playDrum(id, 0.68);
+                updateScreenCompat("DRUM KIT", id.toUpperCase(), "ARP");
+            }, index * 105);
+        });
+        if (object) window.setTimeout(() => flashRuntimeMesh(object, false), 180);
+        return;
+    }
+
+    if (state.arp && state.currentMode !== "guitar") {
+        const pattern = [0, 4, 7, 12];
+        pattern.forEach((offset, index) => {
+            window.setTimeout(() => {
+                const arpVoice = triggerByMode(adjusted + offset, 0.68);
+                if (arpVoice) window.setTimeout(() => releaseVoice(arpVoice), state.currentMode === "bass" ? 260 : 210);
+            }, index * 105);
+        });
+        if (object) window.setTimeout(() => flashRuntimeMesh(object, false), 180);
+        return;
+    }
+
+    const voice = triggerByMode(adjusted, 0.82);
+    if (voice) {
+        activePointers.set(pointerId, { voice, key: object });
+    } else if (object) {
+        window.setTimeout(() => flashRuntimeMesh(object, false), 160);
+    }
+}
+
+function pointerUp(pointerId) {
+    const held = activePointers.get(pointerId);
+    if (held) {
+        if (held.key) flashRuntimeMesh(held.key, false);
+        if (held.voice) releaseVoice(held.voice);
+        activePointers.delete(pointerId);
+    }
+}
+
+function cancelActiveControlPointers() {
+    activePointers.forEach((held) => {
+        if (held.key) flashRuntimeMesh(held.key, false);
+        if (held.voice) releaseVoice(held.voice, { force: true });
+    });
+    activePointers.clear();
+}
+
+function muteOutputForMarkerLoss() {
+    if (!audioCtx || !masterGain) return;
+    const now = audioCtx.currentTime;
+    masterGain.gain.cancelScheduledValues(now);
+    masterGain.gain.setTargetAtTime(0.0001, now, 0.012);
+}
+
+function restoreOutputForMarkerFound() {
+    if (!audioCtx || !masterGain) return;
+    const now = audioCtx.currentTime;
+    masterGain.gain.cancelScheduledValues(now);
+    masterGain.gain.setTargetAtTime(state.faders.VOL, now, 0.018);
+}
+
+function updateDisplayForKey(midi) {
+    const name = `${NOTE_NAMES[((midi % 12) + 12) % 12]}${Math.floor(midi / 12) - 1}`;
+    if (state.currentMode === "drum") {
+        updateScreenCompat("DRUM KIT", drumForMidi(midi).toUpperCase(), "HIT");
+        return;
+    }
+    updateScreenCompat(state.currentPreset, state.currentMode === "guitar" ? "GUITAR" : state.currentWave, name);
+}
+
+function updateScreenCompat(line1, line2, line3) {
+    document.querySelectorAll('[runtime-synth-workstation]').forEach((el) => {
+        el.components['runtime-synth-workstation']?.updateScreen(line1, line2, line3);
+    });
+}
+
+function playRuntimeSynthMidi(midi, velocity = 0.82, duration = 0.6) {
+    unlockAudio();
+    const voice = triggerByMode(midi + state.octaveShift, velocity);
+    if (voice) window.setTimeout(() => releaseVoice(voice), duration * 1000);
+    return voice;
+}
+
+function playRuntimeDrum(id, velocity = 0.9) {
+    unlockAudio();
+    playDrum(id, velocity);
+}
+
+function playSynthNote(noteName) {
+    playRuntimeSynthMidi(noteNameToMidi(noteName), 0.82, 0.5);
+}
+
+AFRAME.registerComponent('runtime-synth-workstation', {
+    init: function () {
+        this.built = false;
+        this.screen = null;
+        this.controls = new Map();
+        this.keys = new Map();
+        this.faders = new Map();
+        this.knobs = new Map();
+        this.strips = new Map();
+        this.interactives = [];
+        this.activeKeys = new Map();
+        this.dragState = null;
+        this.pointerHandledUntil = 0;
+        this.handleClick = this.handleClick.bind(this);
+        this.handlePointerDown = this.handlePointerDown.bind(this);
+        this.handlePointerMove = this.handlePointerMove.bind(this);
+        this.handlePointerUp = this.handlePointerUp.bind(this);
+        this.el.classList.add('playable');
+        this.el.addEventListener('mousedown', this.handlePointerDown);
+        this.el.addEventListener('touchstart', this.handlePointerDown);
+        this.el.addEventListener('click', this.handleClick);
+        document.addEventListener('mousemove', this.handlePointerMove);
+        document.addEventListener('touchmove', this.handlePointerMove, { passive: false });
+        document.addEventListener('mouseup', this.handlePointerUp);
+        document.addEventListener('touchend', this.handlePointerUp);
+        this.build();
+    },
+
+    buildOriginal: function () {
+        const root = this.el;
+        root.innerHTML = '';
+        this.interactives = [];
+        this.controls.clear();
+        this.keys.clear();
+        this.faders.clear();
+        this.knobs.clear();
+        this.strips.clear();
+
+        const group = new THREE.Group();
+        group.name = 'AR_Mini_Synth_Workstation';
+        group.rotation.x = -Math.PI / 2;
+        group.scale.setScalar(0.21);
+        root.object3D.add(group);
+        this.group = group;
+
+        const bodyMat = makeRuntimeMaterial({ color: 0x141a22, roughness: 0.55, metalness: 0.32 });
+        const sideMat = makeRuntimeMaterial({ color: 0x07090d, roughness: 0.72, metalness: 0.22 });
+        const panelMat = makeRuntimeMaterial({ color: 0x1c2632, roughness: 0.48, metalness: 0.36 });
+
+        const base = new THREE.Mesh(new THREE.BoxGeometry(5.55, 2.32, 0.30), bodyMat);
+        base.position.set(0, -0.12, -0.08);
+        group.add(base);
+
+        const backLip = new THREE.Mesh(new THREE.BoxGeometry(5.55, 0.16, 0.36), sideMat);
+        backLip.position.set(0, 1.02, 0.06);
+        group.add(backLip);
+
+        const panel = new THREE.Group();
+        panel.name = 'synth_slanted_control_panel';
+        panel.position.set(0, 0.43, 0.10);
+        panel.rotation.x = -0.18;
+        group.add(panel);
+        this.panel = panel;
+
+        const panelPlate = new THREE.Mesh(new THREE.BoxGeometry(5.30, 1.16, 0.18), panelMat);
+        panel.add(panelPlate);
+        addRuntimeMeshLabel(panel, 'AR MINI SYNTH WORKSTATION', 0, 0.48, 0.112, 2.4, 0.14, { fontSize: 20, color: '#dbfff5' });
+
+        this.buildOriginalPresetButtons(panel);
+        this.buildOriginalWaveButtons(panel);
+        this.buildOriginalFilterKnobs(panel);
+        this.buildOriginalFaders(panel);
+        this.buildOriginalPerformanceButtons(panel);
+        this.buildOriginalScreen(panel);
+        this.buildOriginalTouchStrips(panel);
+        this.buildOriginalKeyboard(group);
+        this.selectPreset(runtimeSynthState.preset || 'SYNTH');
+        this.selectWave(runtimeSynthState.waveId || 'SAW');
+        this.controls.forEach((mesh, key) => {
+            if (key.startsWith('perf-')) {
+                const id = key.replace('perf-', '');
+                const isActive = id === 'GLIDE' ? runtimeSynthState.glide : id === 'ARP' ? runtimeSynthState.arp : runtimeSynthState.hold;
+                setRuntimeButtonActive(mesh, isActive, 0x63e6be);
+            }
+        });
+        this.updateOriginalScreen(runtimeSynthState.preset || 'SYNTH', runtimeSynthState.waveId || 'SAW', 'READY');
+        this.el.emit('model-loaded');
+    },
+
+    addInteractive: function (mesh, interaction) {
+        mesh.userData.interaction = interaction;
+        this.interactives.push(mesh);
+        return mesh;
+    },
+
+    buildOriginalPresetButtons: function (panel) {
+        addRuntimeMeshLabel(panel, 'PRESET', -2.08, 0.31, 0.18, 0.86, 0.13, { fontSize: 18, color: '#9cecff' });
+        [['SYNTH', -2.08, 0.10], ['GUITAR', -2.08, -0.16], ['DRUM', -2.08, -0.42], ['BASS', -2.08, -0.68]].forEach(([id, x, y]) => {
+            const mesh = this.createOriginalButton(panel, id, x, y, parseInt(runtimePresets[id].color.slice(1), 16), { kind: 'preset', id }, { w: 0.78, h: 0.22 });
+            this.controls.set(`preset-${id}`, mesh);
+        });
+    },
+
+    buildOriginalWaveButtons: function (panel) {
+        addRuntimeMeshLabel(panel, 'WAVE', -1.15, 0.31, 0.18, 0.78, 0.13, { fontSize: 18, color: '#9cecff' });
+        [['SAW', -1.15, 0.10], ['SQUARE', -1.15, -0.18], ['SINE', -1.15, -0.46]].forEach(([id, x, y]) => {
+            const mesh = this.createOriginalButton(panel, id, x, y, parseInt(runtimeWaves[id].color.slice(1), 16), { kind: 'wave', id }, { w: 0.78, h: 0.22 });
+            this.controls.set(`wave-${id}`, mesh);
+        });
+    },
+
+    buildOriginalFilterKnobs: function (panel) {
+        addRuntimeMeshLabel(panel, 'FILTER', -0.12, 0.31, 0.18, 0.76, 0.13, { fontSize: 18, color: '#9cecff' });
+        this.knobs.set('cutoff', this.createOriginalKnob(panel, 'CUTOFF', -0.32, -0.06, 0.27, runtimeSynthState.cutoff, 0x3aa6ff, 'cutoff'));
+        this.knobs.set('reso', this.createOriginalKnob(panel, 'RESO', 0.28, -0.06, 0.20, runtimeSynthState.reso, 0xffa23a, 'reso'));
+    },
+
+    createOriginalKnob: function (parent, label, x, y, radius, value, color, id) {
+        const group = new THREE.Group();
+        group.position.set(x, y, 0.16);
+        parent.add(group);
+        const base = new THREE.Mesh(new THREE.CylinderGeometry(radius, radius, 0.09, 36), makeRuntimeMaterial({ color: 0x0a0d12, emissive: color, roughness: 0.34, metalness: 0.45 }));
+        base.rotation.x = Math.PI / 2;
+        group.add(base);
+        const indicator = new THREE.Mesh(new THREE.BoxGeometry(radius * 0.10, radius * 0.82, 0.026), makeRuntimeMaterial({ color, emissive: color }));
+        indicator.position.set(0, radius * 0.26, 0.07);
+        group.add(indicator);
+        const hit = new THREE.Mesh(new THREE.BoxGeometry(radius * 2.25, radius * 2.25, 0.04), new THREE.MeshBasicMaterial({ transparent: true, opacity: 0 }));
+        hit.position.set(x, y, 0.24);
+        parent.add(hit);
+        this.addInteractive(hit, { kind: 'knob', id });
+        addRuntimeMeshLabel(parent, label, x, y - radius - 0.16, 0.20, radius * 2.2, 0.13, { fontSize: 18, color: '#f6fff8' });
+        const knob = { group, indicator, value, color };
+        this.updateOriginalKnobVisual(knob);
+        return knob;
+    },
+
+    buildOriginalFaders: function (panel) {
+        addRuntimeMeshLabel(panel, 'ENVELOPE / FX', 1.33, 0.31, 0.18, 1.46, 0.13, { fontSize: 18, color: '#9cecff' });
+        [['A', 0.62, 0x3aa6ff], ['D', 0.91, 0x3aa6ff], ['S', 1.20, 0x3aa6ff], ['R', 1.49, 0x3aa6ff], ['FX', 1.78, 0xb26bff], ['VOL', 2.07, 0x39e59f]].forEach(([id, x, color]) => {
+            this.faders.set(id, this.createOriginalFader(panel, id, x, -0.18, color, id, runtimeSynthState.faders[id]));
+        });
+    },
+
+    createOriginalFader: function (parent, label, x, y, color, id, value) {
+        const length = 0.58;
+        const track = new THREE.Mesh(new THREE.BoxGeometry(0.05, length, 0.035), makeRuntimeMaterial({ color: 0x070b10 }));
+        track.position.set(x, y, 0.17);
+        parent.add(track);
+        const fill = new THREE.Mesh(new THREE.BoxGeometry(0.062, length, 0.02), makeRuntimeMaterial({ color, emissive: color, transparent: true, opacity: 0.42 }));
+        fill.position.set(x, y, 0.19);
+        parent.add(fill);
+        const thumb = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.09, 0.065), makeRuntimeMaterial({ color, emissive: color, roughness: 0.3 }));
+        parent.add(thumb);
+        const hit = new THREE.Mesh(new THREE.BoxGeometry(0.25, length + 0.14, 0.04), new THREE.MeshBasicMaterial({ transparent: true, opacity: 0 }));
+        hit.position.set(x, y, 0.25);
+        parent.add(hit);
+        this.addInteractive(hit, { kind: 'fader', id });
+        addRuntimeMeshLabel(parent, label, x, y - length / 2 - 0.15, 0.20, 0.22, 0.12, { fontSize: 20, color: '#f6fff8' });
+        const fader = { x, y, length, thumb, fill, value, color };
+        this.updateOriginalFaderVisual(fader);
+        return fader;
+    },
+
+    buildOriginalPerformanceButtons: function (panel) {
+        [['GLIDE', -0.36], ['ARP', 0.04], ['HOLD', 0.44]].forEach(([id, x]) => {
+            const mesh = this.createOriginalButton(panel, id, x, -0.68, 0x63e6be, { kind: 'performance', id }, { w: 0.34, h: 0.22 });
+            this.controls.set(`perf-${id}`, mesh);
+        });
+    },
+
+    buildOriginalScreen: function (panel) {
+        const screen = new THREE.Mesh(new THREE.BoxGeometry(1.00, 0.46, 0.07), makeRuntimeMaterial({ color: 0x061211, emissive: 0x113a31, roughness: 0.22 }));
+        screen.position.set(2.18, 0.03, 0.16);
+        panel.add(screen);
+        this.screenMaterial = new THREE.MeshBasicMaterial({ transparent: true, depthWrite: false });
+        const display = new THREE.Mesh(new THREE.PlaneGeometry(0.86, 0.34), this.screenMaterial);
+        display.position.set(2.18, 0.03, 0.22);
+        panel.add(display);
+    },
+
+    buildOriginalTouchStrips: function (panel) {
+        [['PITCH', -2.55, -0.24, 0xffdf6e], ['MOD', -2.55, -0.62, 0x63e6be]].forEach(([id, x, y, color]) => {
+            const track = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.30, 0.05), makeRuntimeMaterial({ color: 0x0a0e13, emissive: color }));
+            track.position.set(x, y, 0.19);
+            panel.add(track);
+            const fill = new THREE.Mesh(new THREE.BoxGeometry(0.13, 0.06, 0.05), makeRuntimeMaterial({ color, emissive: color }));
+            fill.position.set(x, y, 0.24);
+            panel.add(fill);
+            const hit = new THREE.Mesh(new THREE.BoxGeometry(0.28, 0.42, 0.04), new THREE.MeshBasicMaterial({ transparent: true, opacity: 0 }));
+            hit.position.set(x, y, 0.28);
+            panel.add(hit);
+            this.addInteractive(hit, { kind: 'strip', id });
+            addRuntimeMeshLabel(panel, id, x + 0.30, y, 0.21, 0.36, 0.12, { fontSize: 18, color: '#f6fff8' });
+            this.strips.set(id, { fill, centerY: y, color, value: id === 'PITCH' ? runtimeSynthState.pitch : runtimeSynthState.mod });
+            this.updateOriginalStripVisual(id);
+        });
+    },
+
+    buildOriginalKeyboard: function (group) {
+        const keyboardBase = new THREE.Mesh(new THREE.BoxGeometry(5.18, 0.96, 0.16), makeRuntimeMaterial({ color: 0x07090d, roughness: 0.58, metalness: 0.28 }));
+        keyboardBase.position.set(0.12, -0.72, 0.08);
+        group.add(keyboardBase);
+        addRuntimeMeshLabel(group, '25 KEY TOUCH SYNTH', 1.54, -1.20, 0.28, 1.35, 0.12, { fontSize: 18, color: '#9cecff' });
+        this.createOriginalButton(group, 'OCT -', -2.28, -1.16, 0xffdf6e, { kind: 'octave', semitoneDelta: -12 }, { w: 0.45, h: 0.18 }).position.z = 0.32;
+        this.createOriginalButton(group, 'OCT +', -1.72, -1.16, 0xffdf6e, { kind: 'octave', semitoneDelta: 12 }, { w: 0.45, h: 0.18 }).position.z = 0.32;
+
+        const whitePcs = new Set([0, 2, 4, 5, 7, 9, 11]);
+        const startMidi = 48;
+        const endMidi = 72;
+        const whiteCount = Array.from({ length: endMidi - startMidi + 1 }, (_, i) => startMidi + i).filter((midi) => whitePcs.has(midi % 12)).length;
+        const whiteW = 4.84 / whiteCount;
+        let whiteIndex = 0;
+        for (let midi = startMidi; midi <= endMidi; midi++) {
+            const pc = midi % 12;
+            const isWhite = whitePcs.has(pc);
+            if (isWhite) {
+                const x = (whiteIndex - (whiteCount - 1) / 2) * whiteW + 0.15;
+                const key = new THREE.Mesh(new THREE.BoxGeometry(whiteW * 0.92, 0.78, 0.12), makeRuntimeMaterial({ color: 0xf5f0df, roughness: 0.38, metalness: 0.05 }));
+                key.position.set(x, -0.78, 0.22);
+                key.userData.baseColor = 0xf5f0df;
+                key.userData.activeColor = 0x3aa6ff;
+                key.userData.baseZ = key.position.z;
+                key.userData.midi = midi;
+                group.add(key);
+                this.addInteractive(key, { kind: 'key', midi });
+                this.keys.set(midi, key);
+                if (pc === 0) addRuntimeMeshLabel(group, `C${Math.floor(midi / 12) - 1}`, x, -1.11, 0.31, whiteW * 0.70, 0.10, { fontSize: 18, color: '#10131a' });
+                whiteIndex += 1;
+            } else {
+                const x = (whiteIndex - 1 - (whiteCount - 1) / 2) * whiteW + whiteW * 0.48 + 0.15;
+                const key = new THREE.Mesh(new THREE.BoxGeometry(whiteW * 0.58, 0.47, 0.16), makeRuntimeMaterial({ color: 0x05070a, roughness: 0.42, metalness: 0.1 }));
+                key.position.set(x, -0.59, 0.34);
+                key.userData.baseColor = 0x05070a;
+                key.userData.activeColor = 0xb26bff;
+                key.userData.baseZ = key.position.z;
+                key.userData.midi = midi;
+                group.add(key);
+                this.addInteractive(key, { kind: 'key', midi });
+                this.keys.set(midi, key);
+            }
+        }
+    },
+
+    createOriginalButton: function (parent, label, x, y, color, interaction, size = { w: 0.58, h: 0.22 }) {
+        const mesh = new THREE.Mesh(new THREE.BoxGeometry(size.w, size.h, 0.08), makeRuntimeMaterial({ color: 0x26313e, emissive: 0x000000, roughness: 0.42, metalness: 0.25 }));
+        mesh.position.set(x, y, 0.13);
+        mesh.userData.baseColor = 0x26313e;
+        mesh.userData.activeColor = color;
+        mesh.userData.isActive = false;
+        parent.add(mesh);
+        this.addInteractive(mesh, interaction);
+        addRuntimeMeshLabel(parent, label, x, y, 0.18, size.w * 0.9, size.h * 0.7, { fontSize: 26, color: '#f6fff8' });
+        return mesh;
+    },
+
+    build: function () {
+        return this.buildOriginal();
+    },
+
+    playKey: function (midi) {
+        playRuntimeSynthMidi(midi);
+    },
+
+    shiftOctave: function (delta) {
+        runtimeSynthState.octaveShift = Math.max(-24, Math.min(24, runtimeSynthState.octaveShift + delta));
+        this.updateScreen(runtimeSynthState.preset, runtimeSynthState.waveId, `OCT ${runtimeSynthState.octaveShift / 12}`);
+    },
+
+    selectPreset: function (id) {
+        if (!runtimePresets[id]) return;
+        runtimeSynthState.preset = id;
+        runtimeSynthState.mode = runtimePresets[id].mode;
+        resetAudioForPreset(id);
+        this.controls.forEach((entity, key) => {
+            if (key.startsWith('preset-')) {
+                const active = key === `preset-${id}`;
+                if (entity.isObject3D) {
+                    setRuntimeButtonActive(entity, active, parseInt(runtimePresets[key.replace('preset-', '')].color.slice(1), 16));
+                } else {
+                    entity.setAttribute('material', 'emissiveIntensity', active ? 0.85 : 0.08);
+                    entity.setAttribute('material', 'color', active ? runtimePresets[id].color : '#26313e');
+                }
+            }
+        });
+        this.updateScreen(id === 'DRUM' ? 'DRUM KIT' : id, id === 'SYNTH' || id === 'BASS' ? runtimeSynthState.waveId : 'PRESET', 'READY');
+    },
+
+    selectWave: function (id) {
+        if (!runtimeWaves[id]) return;
+        runtimeSynthState.waveId = id;
+        runtimeSynthState.wave = runtimeWaves[id].osc;
+        this.controls.forEach((entity, key) => {
+            if (key.startsWith('wave-')) {
+                const active = key === `wave-${id}`;
+                if (entity.isObject3D) {
+                    setRuntimeButtonActive(entity, active, parseInt(runtimeWaves[key.replace('wave-', '')].color.slice(1), 16));
+                } else {
+                    entity.setAttribute('material', 'emissiveIntensity', active ? 0.85 : 0.08);
+                    entity.setAttribute('material', 'color', active ? runtimeWaves[id].color : '#26313e');
+                }
+            }
+        });
+        this.updateScreen(runtimeSynthState.preset, id, 'READY');
+    },
+
+    updateScreen: function (line1, line2, line3) {
+        if (this.screenMaterial) {
+            const texture = runtimeLabelTexture([line1, line2, line3].filter(Boolean), {
+                width: 512,
+                height: 192,
+                background: '#04110f',
+                color: '#63e6be',
+                fontSize: 34
+            });
+            if (this.screenMaterial.map) this.screenMaterial.map.dispose();
+            this.screenMaterial.map = texture;
+            this.screenMaterial.needsUpdate = true;
+        } else {
+            updateRuntimeScreen(this.screen, line1, line2, line3);
+        }
+    },
+
+    updateOriginalScreen: function (line1, line2, line3) {
+        this.updateScreen(line1, line2, line3);
+    },
+
+    updateOriginalKnobVisual: function (knob) {
+        const angle = -2.25 + 4.5 * knob.value;
+        knob.indicator.rotation.z = -angle;
+        knob.group.children[0].material.emissiveIntensity = 0.12 + knob.value * 0.7;
+    },
+
+    updateOriginalFaderVisual: function (fader) {
+        const thumbY = fader.y - fader.length / 2 + fader.value * fader.length;
+        fader.thumb.position.set(fader.x, thumbY, 0.24);
+        fader.fill.scale.y = Math.max(0.04, fader.value);
+        fader.fill.position.y = fader.y - fader.length / 2 + (fader.length * fader.value) / 2;
+        fader.thumb.material.emissiveIntensity = 0.18 + fader.value * 0.75;
+    },
+
+    updateOriginalStripVisual: function (id) {
+        const strip = this.strips.get(id);
+        if (!strip) return;
+        strip.fill.position.y = strip.centerY - 0.12 + strip.value * 0.24;
+        strip.fill.material.emissiveIntensity = 0.18 + strip.value * 0.9;
+    },
+
+    updateContinuousControl: function (interaction, delta) {
+        if (interaction.kind === 'knob') {
+            const knob = this.knobs.get(interaction.id);
+            if (!knob) return;
+            knob.value = clampRuntimeValue(knob.value + delta);
+            if (interaction.id === 'cutoff') runtimeSynthState.cutoff = knob.value;
+            if (interaction.id === 'reso') runtimeSynthState.reso = knob.value;
+            this.updateOriginalKnobVisual(knob);
+            this.updateScreen(runtimeSynthState.preset, runtimeSynthState.waveId, `${interaction.id.toUpperCase()} ${Math.round(knob.value * 100)}`);
+            return;
+        }
+        if (interaction.kind === 'fader') {
+            const fader = this.faders.get(interaction.id);
+            if (!fader) return;
+            fader.value = clampRuntimeValue(fader.value + delta);
+            runtimeSynthState.faders[interaction.id] = fader.value;
+            this.updateOriginalFaderVisual(fader);
+            if (interaction.id === 'VOL' && masterGain && audioCtx) masterGain.gain.setTargetAtTime(fader.value, audioCtx.currentTime, 0.02);
+            if (interaction.id === 'FX' && fxSend && audioCtx) fxSend.gain.setTargetAtTime(fader.value * 0.34, audioCtx.currentTime, 0.02);
+            if (interaction.id === 'FX' && guitarReverbGain && audioCtx) guitarReverbGain.gain.setTargetAtTime(getOriginalGuitarParams().reverb * 0.36, audioCtx.currentTime, 0.02);
+            this.updateScreen(runtimeSynthState.preset, runtimeSynthState.waveId, `${interaction.id} ${Math.round(fader.value * 100)}`);
+            return;
+        }
+        if (interaction.kind === 'strip') {
+            const strip = this.strips.get(interaction.id);
+            if (!strip) return;
+            strip.value = clampRuntimeValue(strip.value + delta);
+            if (interaction.id === 'PITCH') runtimeSynthState.pitch = strip.value;
+            if (interaction.id === 'MOD') runtimeSynthState.mod = strip.value;
+            this.updateOriginalStripVisual(interaction.id);
+            this.updateScreen(runtimeSynthState.preset, runtimeSynthState.waveId, `${interaction.id} ${Math.round(strip.value * 100)}`);
+        }
+    },
+
+    stepContinuousControl: function (interaction) {
+        const step = interaction.kind === 'strip' ? 0.25 : 0.12;
+        this.updateContinuousControl(interaction, step);
+        if (interaction.kind === 'knob') {
+            const knob = this.knobs.get(interaction.id);
+            if (knob && knob.value >= 0.98) this.updateContinuousControl(interaction, -0.94);
+        }
+        if (interaction.kind === 'fader') {
+            const fader = this.faders.get(interaction.id);
+            if (fader && fader.value >= 0.98) this.updateContinuousControl(interaction, -0.96);
+        }
+        if (interaction.kind === 'strip') {
+            const strip = this.strips.get(interaction.id);
+            if (strip && strip.value >= 0.98) this.updateContinuousControl(interaction, -1);
+        }
+    },
+
+    handlePointerDown: function (evt) {
+        if (modelGestureMode !== 'interact') return;
+        const { object, interaction } = getRuntimeInteractionFromEvent(evt);
+        if (!interaction) return;
+        evt.stopPropagation();
+        if (evt.preventDefault) evt.preventDefault();
+        runtimeControlPointerActive = true;
+        this.pointerHandledUntil = Date.now() + 500;
+        const pointer = getRuntimeEventPointer(evt);
+        const pointerId = getRuntimePointerId(evt);
+
+        if (interaction.kind === 'preset') return this.selectPreset(interaction.id);
+        if (interaction.kind === 'wave') return this.selectWave(interaction.id);
+        if (interaction.kind === 'performance') {
+            const key = interaction.id.toLowerCase();
+            runtimeSynthState[key] = !runtimeSynthState[key];
+            setRuntimeButtonActive(object, runtimeSynthState[key], 0x63e6be);
+            this.updateScreen(runtimeSynthState.preset, runtimeSynthState.waveId, `${interaction.id} ${runtimeSynthState[key] ? 'ON' : 'OFF'}`);
+            return;
+        }
+        if (interaction.kind === 'octave') {
+            flashRuntimeMesh(object, true);
+            this.shiftOctave(interaction.semitoneDelta);
+            setTimeout(() => flashRuntimeMesh(object, false), 110);
+            return;
+        }
+        if (interaction.kind === 'key') {
+            this.activeKeys.set(pointerId, object);
+            playKey(interaction.midi, object, pointerId);
+            return;
+        }
+        if (interaction.kind === 'knob' || interaction.kind === 'fader' || interaction.kind === 'strip') {
+            this.dragState = {
+                interaction,
+                lastX: pointer.x,
+                lastY: pointer.y,
+                totalX: 0,
+                totalY: 0,
+                moved: false
+            };
+        }
+    },
+
+    handlePointerMove: function (evt) {
+        if (!this.dragState) return;
+        if (evt.preventDefault) evt.preventDefault();
+        const pointer = getRuntimeEventPointer(evt);
+        const dx = pointer.x - this.dragState.lastX;
+        const dy = pointer.y - this.dragState.lastY;
+        this.dragState.lastX = pointer.x;
+        this.dragState.lastY = pointer.y;
+        this.dragState.totalX += dx;
+        this.dragState.totalY += dy;
+        if (Math.abs(this.dragState.totalX) + Math.abs(this.dragState.totalY) > 3) this.dragState.moved = true;
+        const delta = this.dragState.interaction.kind === 'strip' ? (-dy / 160) : (((-dy) + dx * 0.45) / 180);
+        this.updateContinuousControl(this.dragState.interaction, delta);
+    },
+
+    handlePointerUp: function (evt) {
+        runtimeControlPointerActive = false;
+        const pointerId = getRuntimePointerId(evt);
+        pointerUp(pointerId);
+        if (this.activeKeys) {
+            this.activeKeys.delete(pointerId);
+        }
+        if (this.dragState) {
+            this.dragState = null;
+        }
+    },
+
+    handleClick: function (evt) {
+        if (modelGestureMode !== 'interact') return;
+        if (Date.now() < this.pointerHandledUntil) return;
+        const object = evt.detail && evt.detail.intersection && evt.detail.intersection.object;
+        const interaction = object && object.userData && object.userData.interaction;
+        if (!interaction) return;
+        evt.stopPropagation();
+        if (interaction.kind === 'preset') return this.selectPreset(interaction.id);
+        if (interaction.kind === 'wave') return this.selectWave(interaction.id);
+        if (interaction.kind === 'performance') {
+            const key = interaction.id.toLowerCase();
+            runtimeSynthState[key] = !runtimeSynthState[key];
+            setRuntimeButtonActive(object, runtimeSynthState[key], 0x63e6be);
+            this.updateScreen(runtimeSynthState.preset, runtimeSynthState.waveId, `${interaction.id} ${runtimeSynthState[key] ? 'ON' : 'OFF'}`);
+            return;
+        }
+        if (interaction.kind === 'octave') return this.shiftOctave(interaction.semitoneDelta);
+        if (interaction.kind === 'key') {
+            const pointerId = getRuntimePointerId(evt);
+            playKey(interaction.midi, object, pointerId);
+            window.setTimeout(() => pointerUp(pointerId), 180);
+            return;
+        }
+        if (interaction.kind === 'knob') {
+            const knob = this.knobs.get(interaction.id);
+            if (!knob) return;
+            knob.value = Math.min(1, knob.value + 0.12);
+            if (knob.value >= 1) knob.value = 0.04;
+            if (interaction.id === 'cutoff') runtimeSynthState.cutoff = knob.value;
+            if (interaction.id === 'reso') runtimeSynthState.reso = knob.value;
+            this.updateOriginalKnobVisual(knob);
+            this.updateScreen(runtimeSynthState.preset, runtimeSynthState.waveId, `${interaction.id.toUpperCase()} ${Math.round(knob.value * 100)}`);
+            return;
+        }
+        if (interaction.kind === 'fader') {
+            const fader = this.faders.get(interaction.id);
+            if (!fader) return;
+            fader.value = Math.min(1, fader.value + 0.12);
+            if (fader.value >= 1) fader.value = 0.02;
+            runtimeSynthState.faders[interaction.id] = fader.value;
+            this.updateOriginalFaderVisual(fader);
+            this.updateScreen(runtimeSynthState.preset, runtimeSynthState.waveId, `${interaction.id} ${Math.round(fader.value * 100)}`);
+            return;
+        }
+        if (interaction.kind === 'strip') {
+            const strip = this.strips.get(interaction.id);
+            if (!strip) return;
+            strip.value = strip.value > 0.5 ? 0 : 1;
+            if (interaction.id === 'PITCH') runtimeSynthState.pitch = strip.value ? 0.65 : 0.35;
+            if (interaction.id === 'MOD') runtimeSynthState.mod = strip.value;
+            this.updateOriginalStripVisual(interaction.id);
+            this.updateScreen(runtimeSynthState.preset, runtimeSynthState.waveId, `${interaction.id} ${Math.round(strip.value * 100)}`);
+        }
+    },
+
+    remove: function () {
+        this.el.removeEventListener('mousedown', this.handlePointerDown);
+        this.el.removeEventListener('touchstart', this.handlePointerDown);
+        this.el.removeEventListener('click', this.handleClick);
+        document.removeEventListener('mousemove', this.handlePointerMove);
+        document.removeEventListener('touchmove', this.handlePointerMove);
+        document.removeEventListener('mouseup', this.handlePointerUp);
+        document.removeEventListener('touchend', this.handlePointerUp);
+    }
+});
+
+AFRAME.registerComponent('runtime-drum-machine', {
+    init: function () {
+        this.patternTimer = null;
+        this.screen = null;
+        this.knobs = new Map();
+        this.pads = new Map();
+        this.interactives = [];
+        this.activePressMesh = null;
+        this.dragState = null;
+        this.pointerHandledUntil = 0;
+        this.handleClick = this.handleClick.bind(this);
+        this.handlePointerDown = this.handlePointerDown.bind(this);
+        this.handlePointerMove = this.handlePointerMove.bind(this);
+        this.handlePointerUp = this.handlePointerUp.bind(this);
+        this.el.classList.add('playable');
+        this.el.addEventListener('mousedown', this.handlePointerDown);
+        this.el.addEventListener('touchstart', this.handlePointerDown);
+        this.el.addEventListener('click', this.handleClick);
+        document.addEventListener('mousemove', this.handlePointerMove);
+        document.addEventListener('touchmove', this.handlePointerMove, { passive: false });
+        document.addEventListener('mouseup', this.handlePointerUp);
+        document.addEventListener('touchend', this.handlePointerUp);
+        this.build();
+    },
+
+    buildOriginal: function () {
+        const root = this.el;
+        root.innerHTML = '';
+        this.interactives = [];
+        this.knobs.clear();
+        this.pads.clear();
+
+        const group = new THREE.Group();
+        group.name = 'QR_Drum_Machine';
+        group.rotation.x = -Math.PI / 2;
+        group.scale.setScalar(0.21);
+        root.object3D.add(group);
+        this.group = group;
+
+        const baseMat = makeRuntimeMaterial({ color: 0x101821, roughness: 0.54, metalness: 0.38 });
+        const sideMat = makeRuntimeMaterial({ color: 0x05080d, roughness: 0.62, metalness: 0.30 });
+        const panelMat = makeRuntimeMaterial({ color: 0x17202a, roughness: 0.46, metalness: 0.42 });
+
+        const base = new THREE.Mesh(new THREE.BoxGeometry(5.65, 2.20, 0.32), baseMat);
+        base.position.set(0, -0.08, -0.10);
+        group.add(base);
+
+        const frontLip = new THREE.Mesh(new THREE.BoxGeometry(5.70, 0.18, 0.28), sideMat);
+        frontLip.position.set(0, -1.10, 0.04);
+        group.add(frontLip);
+
+        const panel = new THREE.Group();
+        panel.name = 'drum_machine_panel';
+        panel.position.set(0, 0.08, 0.14);
+        panel.rotation.x = -0.15;
+        group.add(panel);
+        this.panel = panel;
+
+        const panelPlate = new THREE.Mesh(new THREE.BoxGeometry(5.34, 1.78, 0.18), panelMat);
+        panel.add(panelPlate);
+        addRuntimeMeshLabel(panel, 'QR DRUM MACHINE', -1.75, 0.72, 0.16, 1.55, 0.15, { fontSize: 22, color: '#dbfff5' });
+
+        [
+            ['kick', 'Kick', -1.92, 0.38, 0xff6b3a],
+            ['snare', 'Snare', -1.20, 0.38, 0x3aa6ff],
+            ['clap', 'Clap', -0.48, 0.38, 0xffdf6e],
+            ['rim', 'Rim', 0.24, 0.38, 0xb26bff],
+            ['hat', 'Hi-Hat', -1.92, -0.16, 0x63e6be],
+            ['hatOpen', 'Open Hat', -1.20, -0.16, 0x63e6be],
+            ['tom', 'Tom', -0.48, -0.16, 0xffa23a],
+            ['crash', 'Crash', 0.24, -0.16, 0xf45cff]
+        ].forEach(([id, label, x, y, color]) => this.createOriginalPad(panel, id, label, x, y, color));
+
+        this.createOriginalButton(panel, 'PLAY', 0.95, -0.62, 0x32c7ff, () => this.playPattern());
+        this.createOriginalButton(panel, 'STOP', 1.55, -0.62, 0xffdf6e, () => this.stopPattern());
+        this.createOriginalButton(panel, 'REC', 2.15, -0.62, 0xff5a66, () => this.toggleRecord());
+
+        const screen = new THREE.Mesh(new THREE.BoxGeometry(1.18, 0.44, 0.08), makeRuntimeMaterial({ color: 0x051311, emissive: 0x0b4639, roughness: 0.22 }));
+        screen.position.set(2.05, 0.48, 0.17);
+        panel.add(screen);
+        this.screenMaterial = new THREE.MeshBasicMaterial({ transparent: true, depthWrite: false });
+        const display = new THREE.Mesh(new THREE.PlaneGeometry(1.02, 0.32), this.screenMaterial);
+        display.position.set(2.05, 0.48, 0.23);
+        panel.add(display);
+
+        [
+            ['tone', 'TONE', 1.28, 0.06, 0x3aa6ff],
+            ['decay', 'DECAY', 1.78, 0.06, 0xffdf6e],
+            ['drive', 'DRIVE', 2.28, 0.06, 0xffa23a],
+            ['space', 'SPACE', 1.54, -0.32, 0xb26bff],
+            ['level', 'LEVEL', 2.06, -0.32, 0x63e6be]
+        ].forEach(([id, label, x, y, color]) => this.createOriginalKnob(panel, id, label, x, y, color));
+        this.updateScreen('QR DRUM', '128 BPM', 'READY');
+        this.el.emit('model-loaded');
+    },
+
+    build: function () {
+        return this.buildOriginal();
+    },
+
+    addInteractive: function (mesh, interaction) {
+        mesh.userData.interaction = interaction;
+        this.interactives.push(mesh);
+        return mesh;
+    },
+
+    createOriginalPad: function (parent, id, label, x, y, color) {
+        const pad = new THREE.Mesh(new THREE.BoxGeometry(0.62, 0.40, 0.10), makeRuntimeMaterial({ color: 0x202b36, emissive: 0x000000, roughness: 0.40, metalness: 0.18 }));
+        pad.position.set(x, y, 0.16);
+        pad.userData.baseColor = 0x202b36;
+        pad.userData.activeColor = color;
+        pad.userData.baseZ = pad.position.z;
+        parent.add(pad);
+        this.addInteractive(pad, { kind: 'drumPad', id });
+        this.pads.set(id, pad);
+        addRuntimeMeshLabel(parent, label, x, y, 0.23, 0.52, 0.12, { fontSize: 22, color: '#f6fff8' });
+        return pad;
+    },
+
+    createOriginalButton: function (parent, label, x, y, color, action) {
+        const mesh = new THREE.Mesh(new THREE.BoxGeometry(0.46, 0.24, 0.09), makeRuntimeMaterial({ color: 0x273241, emissive: color, roughness: 0.36, metalness: 0.25 }));
+        mesh.position.set(x, y, 0.18);
+        mesh.userData.baseColor = 0x273241;
+        mesh.userData.activeColor = color;
+        mesh.userData.baseZ = mesh.position.z;
+        parent.add(mesh);
+        this.addInteractive(mesh, { kind: 'drumButton', label, action });
+        addRuntimeMeshLabel(parent, label, x, y, 0.25, 0.38, 0.11, { fontSize: 22, color: '#ffffff' });
+        return mesh;
+    },
+
+    createOriginalKnob: function (parent, id, label, x, y, color) {
+        const value = runtimeDrumState[id] ?? 0.5;
+        const group = new THREE.Group();
+        group.position.set(x, y, 0.18);
+        parent.add(group);
+        const base = new THREE.Mesh(new THREE.CylinderGeometry(0.16, 0.16, 0.08, 32), makeRuntimeMaterial({ color: 0x0a0d12, emissive: color, roughness: 0.34, metalness: 0.45 }));
+        base.rotation.x = Math.PI / 2;
+        group.add(base);
+        const indicator = new THREE.Mesh(new THREE.BoxGeometry(0.026, 0.13, 0.024), makeRuntimeMaterial({ color, emissive: color }));
+        indicator.position.set(0, 0.05, 0.06);
+        group.add(indicator);
+        const hit = new THREE.Mesh(new THREE.BoxGeometry(0.36, 0.36, 0.04), new THREE.MeshBasicMaterial({ transparent: true, opacity: 0 }));
+        hit.position.set(x, y, 0.26);
+        parent.add(hit);
+        this.addInteractive(hit, { kind: 'drumKnob', id });
+        addRuntimeMeshLabel(parent, label, x, y - 0.26, 0.22, 0.36, 0.10, { fontSize: 16, color: '#f6fff8' });
+        const knob = { group, indicator, value, color };
+        this.knobs.set(id, knob);
+        this.updateOriginalKnobVisual(knob);
+        return knob;
+    },
+
+    updateOriginalKnobVisual: function (knob) {
+        const angle = -2.10 + 4.20 * knob.value;
+        knob.indicator.rotation.z = -angle;
+        knob.group.children[0].material.emissiveIntensity = 0.16 + knob.value * 0.72;
+    },
+
+    playPattern: function () {
+        if (this._patternActive) return;
+        this._patternActive = true;
+        this._patternTimers = [];
+        this._bpm = this._bpm || 128;
+        const stepMs = 60000 / (this._bpm * 4);
+        const pattern = [
+            'kick', 'hat', null, 'hat',
+            'snare', 'hat', null, 'hat',
+            'kick', 'hat', null, 'hatOpen',
+            'snare', 'hat', 'tom', 'crash'
+        ];
+        const totalSteps = pattern.length;
+        let step = 0;
+
+        const tick = () => {
+            if (!this._patternActive) return;
+            const id = pattern[step];
+            if (id) {
+                playRuntimeDrum(id, 0.82);
+                const pad = this.pads && this.pads.get(id);
+                if (pad) {
+                    flashRuntimeMesh(pad, true, 0.018);
+                    this._patternTimers.push(setTimeout(() => flashRuntimeMesh(pad, false, 0.018), Math.min(90, stepMs * 0.7)));
+                }
+            }
+            this.updateScreen('QR DRUM', `${this._bpm} BPM`, `STEP ${step + 1}/${totalSteps}`);
+            step = (step + 1) % totalSteps;
+            this._patternTimers.push(setTimeout(tick, stepMs));
+        };
+        tick();
+
+        if (currentAudioManager && currentAudioManager.markerId === this.el.parentElement.id) {
+            currentAudioManager.isPlaying = true;
+            updateDockButtons();
+        }
+        showNotification(`鼓机 ${this._bpm} BPM 循环中`);
+    },
+
+    playFill: function () {
+        ['tom', 'snare', 'tom', 'kick', 'crash'].forEach((id, index) => {
+            setTimeout(() => playRuntimeDrum(id, 0.9), index * 95);
+        });
+        this.updateScreen('QR DRUM', 'FILL', 'PLAY');
+    },
+
+    stopPattern: function () {
+        this._patternActive = false;
+        if (this._patternTimers) {
+            this._patternTimers.forEach(id => clearTimeout(id));
+            this._patternTimers = [];
+        }
+        if (currentAudioManager && currentAudioManager.markerId === this.el.parentElement.id) {
+            currentAudioManager.isPlaying = false;
+            updateDockButtons();
+        }
+        showNotification('鼓机已停止');
+        this.updateScreen('QR DRUM', `${this._bpm || 128} BPM`, 'READY');
+    },
+
+    updateScreen: function (line1, line2, line3) {
+        if (this.screenMaterial) {
+            const texture = runtimeLabelTexture([line1, line2, line3].filter(Boolean), {
+                width: 512,
+                height: 192,
+                background: '#04110f',
+                color: '#63e6be',
+                fontSize: 34
+            });
+            if (this.screenMaterial.map) this.screenMaterial.map.dispose();
+            this.screenMaterial.map = texture;
+            this.screenMaterial.needsUpdate = true;
+        } else {
+            updateRuntimeScreen(this.screen, line1, line2, line3);
+        }
+    },
+
+    updateContinuousControl: function (interaction, delta) {
+        if (interaction.kind !== 'drumKnob') return;
+        const knob = this.knobs.get(interaction.id);
+        if (!knob) return;
+        knob.value = clampRuntimeValue(knob.value + delta);
+        runtimeDrumState[interaction.id] = knob.value;
+        this.updateOriginalKnobVisual(knob);
+        this.updateScreen('QR DRUM', interaction.id.toUpperCase(), `${Math.round(knob.value * 100)}`);
+    },
+
+    stepContinuousControl: function (interaction) {
+        this.updateContinuousControl(interaction, 0.12);
+        const knob = this.knobs.get(interaction.id);
+        if (knob && knob.value >= 0.98) this.updateContinuousControl(interaction, -0.94);
+    },
+
+    handlePointerDown: function (evt) {
+        if (modelGestureMode !== 'interact') return;
+        const { object, interaction } = getRuntimeInteractionFromEvent(evt);
+        if (!interaction) return;
+        evt.stopPropagation();
+        if (evt.preventDefault) evt.preventDefault();
+        runtimeControlPointerActive = true;
+        this.pointerHandledUntil = Date.now() + 500;
+        const pointer = getRuntimeEventPointer(evt);
+
+        if (interaction.kind === 'drumPad') {
+            if (this.activePressMesh && this.activePressMesh !== object) flashRuntimeMesh(this.activePressMesh, false, 0.018);
+            this.activePressMesh = object;
+            flashRuntimeMesh(object, true, 0.018);
+            playRuntimeDrum(interaction.id, 0.88);
+            this.updateScreen('QR DRUM', interaction.id.toUpperCase(), 'HIT');
+            return;
+        }
+        if (interaction.kind === 'drumButton') {
+            if (this.activePressMesh && this.activePressMesh !== object) flashRuntimeMesh(this.activePressMesh, false, 0.018);
+            this.activePressMesh = object;
+            flashRuntimeMesh(object, true, 0.018);
+            interaction.action();
+            return;
+        }
+        if (interaction.kind === 'drumKnob') {
+            this.dragState = {
+                interaction,
+                lastX: pointer.x,
+                lastY: pointer.y,
+                totalX: 0,
+                totalY: 0,
+                moved: false
+            };
+        }
+    },
+
+    handlePointerMove: function (evt) {
+        if (!this.dragState) return;
+        if (evt.preventDefault) evt.preventDefault();
+        const pointer = getRuntimeEventPointer(evt);
+        const dx = pointer.x - this.dragState.lastX;
+        const dy = pointer.y - this.dragState.lastY;
+        this.dragState.lastX = pointer.x;
+        this.dragState.lastY = pointer.y;
+        this.dragState.totalX += dx;
+        this.dragState.totalY += dy;
+        if (Math.abs(this.dragState.totalX) + Math.abs(this.dragState.totalY) > 3) this.dragState.moved = true;
+        this.updateContinuousControl(this.dragState.interaction, ((-dy) + dx * 0.45) / 180);
+    },
+
+    handlePointerUp: function (evt) {
+        runtimeControlPointerActive = false;
+        if (this.activePressMesh) {
+            flashRuntimeMesh(this.activePressMesh, false, 0.018);
+            this.activePressMesh = null;
+        }
+        if (this.dragState) {
+            this.dragState = null;
+        }
+    },
+
+    handleClick: function (evt) {
+        if (modelGestureMode !== 'interact') return;
+        if (Date.now() < this.pointerHandledUntil) return;
+        const object = evt.detail && evt.detail.intersection && evt.detail.intersection.object;
+        const interaction = object && object.userData && object.userData.interaction;
+        if (!interaction) return;
+        evt.stopPropagation();
+        if (interaction.kind === 'drumPad') {
+            flashRuntimeMesh(object, true, 0.018);
+            playRuntimeDrum(interaction.id, 0.88);
+            this.updateScreen('QR DRUM', interaction.id.toUpperCase(), 'HIT');
+            setTimeout(() => flashRuntimeMesh(object, false, 0.018), 150);
+            return;
+        }
+        if (interaction.kind === 'drumButton') {
+            flashRuntimeMesh(object, true, 0.018);
+            interaction.action();
+            setTimeout(() => flashRuntimeMesh(object, false, 0.018), 150);
+            return;
+        }
+        if (interaction.kind === 'drumKnob') {
+            const knob = this.knobs.get(interaction.id);
+            if (!knob) return;
+            knob.value = Math.min(1, knob.value + 0.12);
+            if (knob.value >= 1) knob.value = 0.04;
+            runtimeDrumState[interaction.id] = knob.value;
+            this.updateOriginalKnobVisual(knob);
+            this.updateScreen('QR DRUM', interaction.id.toUpperCase(), `${Math.round(knob.value * 100)}`);
+        }
+    },
+
+    toggleRecord: function () {
+        this._recordArmed = !this._recordArmed;
+        this.updateScreen('QR DRUM', this._recordArmed ? '● REC ON' : 'REC OFF', 'READY');
+        showNotification(this._recordArmed ? '录制模式已开启' : '录制模式已关闭');
+    },
+
+    remove: function () {
+        this.stopPattern();
+        this.el.removeEventListener('mousedown', this.handlePointerDown);
+        this.el.removeEventListener('touchstart', this.handlePointerDown);
+        this.el.removeEventListener('click', this.handleClick);
+        document.removeEventListener('mousemove', this.handlePointerMove);
+        document.removeEventListener('touchmove', this.handlePointerMove);
+        document.removeEventListener('mouseup', this.handlePointerUp);
+        document.removeEventListener('touchend', this.handlePointerUp);
+    }
+});
 
 // 乐器模拟弹奏组件 (instrument-player)
 AFRAME.registerComponent('instrument-player', {
@@ -1482,6 +3360,7 @@ AFRAME.registerComponent('instrument-handler', {
     onMarkerFound: function () {
         console.log(`Marker found: ${this.markerId} (${this.config.name})`);
         this.setActiveInstrument();
+        restoreOutputForMarkerFound();
         if (this.config.isLoaded) {
             this.modelEntity.setAttribute('visible', true);
         } else {
@@ -1491,6 +3370,15 @@ AFRAME.registerComponent('instrument-handler', {
 
     onMarkerLost: function () {
         console.log(`Marker lost: ${this.markerId}. State will be preserved.`);
+        cancelActiveControlPointers();
+        muteOutputForMarkerLoss();
+        if (this.config.model === 'runtime:drum-machine' && this.modelEntity.components['runtime-drum-machine']) {
+            this.modelEntity.components['runtime-drum-machine'].stopPattern();
+            if (currentAudioManager && currentAudioManager.markerId === this.markerId) {
+                currentAudioManager.isPlaying = false;
+                updateDockButtons();
+            }
+        }
         this.modelEntity.setAttribute('visible', false);
     },
     
@@ -1499,6 +3387,44 @@ AFRAME.registerComponent('instrument-handler', {
     // ====================================================================
     loadResources: function() {
         showLoadingOverlay(this.config.name);
+
+        const loadTextResources = () => {
+            if (!infoCache[this.markerId]) {
+                fetchWithRetry(this.config.info, 3, 1000, `${this.config.name}描述`)
+                    .then(response => response.text())
+                    .then(text => {
+                        infoCache[this.markerId] = text || '';
+                        if (currentAudioManager && currentAudioManager.markerId === this.markerId) {
+                            updateInfoDisplay();
+                        }
+                    })
+                    .catch(err => console.error(`Failed to load info for ${this.markerId} after retries:`, err));
+            }
+            
+            if (!markdownCache[this.markerId]) {
+                 fetchWithRetry(this.config.markdown, 3, 1000, `${this.config.name}介绍`)
+                    .then(response => response.text())
+                    .then(text => markdownCache[this.markerId] = text)
+                    .catch(err => {
+                        console.error(`Failed to load markdown for ${this.markerId} after retries:`, err);
+                        markdownCache[this.markerId] = `## 加载错误\n\n加载介绍内容时发生网络错误。请检查网络后刷新页面。`;
+                    });
+            }
+        };
+
+        if (this.config.model && this.config.model.startsWith('runtime:')) {
+            const runtimeComponent = this.config.model === 'runtime:drum-machine'
+                ? 'runtime-drum-machine'
+                : 'runtime-synth-workstation';
+            this.modelEntity.setAttribute(runtimeComponent, '');
+            this.config.isLoaded = true;
+            loadTextResources();
+            hideLoadingOverlay(true);
+            if (this.marker.object3D.visible) {
+                 this.modelEntity.setAttribute('visible', true);
+            }
+            return;
+        }
         
         // --- 模型加载与重试逻辑 ---
         let modelRetryCount = 0;
@@ -1544,7 +3470,7 @@ AFRAME.registerComponent('instrument-handler', {
         this.modelEntity.setAttribute('gltf-model', `url(${this.config.model})`);
 
         // --- 音频预加载 ---
-        if (!audioCache[this.markerId]) {
+        if (this.config.audio && !audioCache[this.markerId]) {
             const audio = new Audio(this.config.audio);
             audio.preload = 'auto';
             audio.load(); // 开始预加载
@@ -1552,30 +3478,17 @@ AFRAME.registerComponent('instrument-handler', {
         }
 
         // --- Info和Markdown文本加载与重试 ---
-        if (!infoCache[this.markerId]) {
-            fetchWithRetry(this.config.info, 3, 1000, `${this.config.name}描述`)
-                .then(response => response.text())
-                .then(text => {
-                    infoCache[this.markerId] = text || '';
-                    if (currentAudioManager && currentAudioManager.markerId === this.markerId) {
-                        updateInfoDisplay();
-                    }
-                })
-                .catch(err => console.error(`Failed to load info for ${this.markerId} after retries:`, err));
-        }
-        
-        if (!markdownCache[this.markerId]) {
-             fetchWithRetry(this.config.markdown, 3, 1000, `${this.config.name}介绍`)
-                .then(response => response.text())
-                .then(text => markdownCache[this.markerId] = text)
-                .catch(err => {
-                    console.error(`Failed to load markdown for ${this.markerId} after retries:`, err);
-                    markdownCache[this.markerId] = `## 加载错误\n\n加载介绍内容时发生网络错误。请检查网络后刷新页面。`;
-                });
-        }
+        loadTextResources();
     },
 
     setActiveInstrument: function() {
+        const previousMarkerId = currentAudioManager && currentAudioManager.markerId;
+        if (currentAudioManager && currentAudioManager.markerId !== this.markerId) {
+            const previousModel = document.getElementById(`model${currentAudioManager.markerId.replace('marker', '')}`);
+            const previousDrum = previousModel && previousModel.components['runtime-drum-machine'];
+            if (previousDrum) previousDrum.stopPattern();
+        }
+
         if (currentAudioManager && currentAudioManager.markerId !== this.markerId && currentAudioManager.audio && !currentAudioManager.audio.paused) {
             currentAudioManager.audio.pause();
             currentAudioManager.isPlaying = false;
@@ -1587,6 +3500,9 @@ AFRAME.registerComponent('instrument-handler', {
             get audio() { return audioCache[this.markerId]; },
             isPlaying: (currentAudioManager && currentAudioManager.markerId === this.markerId) ? currentAudioManager.isPlaying : false
         };
+        if (previousMarkerId !== this.markerId) {
+            modelGestureMode = getDefaultGestureMode(this.config);
+        }
         
         updateInfoDisplay();
         updateDockButtons();
@@ -1615,6 +3531,8 @@ AFRAME.registerComponent('touch-handler', {
         this.markerId = this.el.parentElement.id;
         this.initialScale = new THREE.Vector3();
         this.initialRotation = new THREE.Euler();
+        this.initialScale.copy(this.model.scale);
+        this.initialRotation.copy(this.model.rotation);
         this.el.addEventListener('model-loaded', () => {
             this.initialScale.copy(this.model.scale);
             const o15Data = this.el.getAttribute('o15');
@@ -1633,6 +3551,11 @@ AFRAME.registerComponent('touch-handler', {
         return currentAudioManager && currentAudioManager.markerId === this.markerId;
     },
     onTouchStart: function (e) {
+        if (runtimeControlPointerActive || modelGestureMode !== 'rotate') {
+            this.isDragging = false;
+            this.isPinching = false;
+            return;
+        }
         if (!this.isThisMarkerActive() || !this.el.getAttribute('visible')) return;
         if (e.touches.length === 1) {
             this.isDragging = true;
@@ -1645,6 +3568,7 @@ AFRAME.registerComponent('touch-handler', {
         }
     },
     onTouchMove: function (e) {
+        if (runtimeControlPointerActive || modelGestureMode !== 'rotate') return;
         if (!this.isThisMarkerActive() || !this.el.getAttribute('visible')) return;
         if (this.isDragging && e.touches.length === 1) {
             const deltaX = e.touches[0].clientX - this.previousTouchPosition.x;
@@ -1695,6 +3619,30 @@ AFRAME.registerComponent('touch-handler', {
 // toggleAudio 函数 - 增加了音频加载失败后的重试机制
 function toggleAudio() {
     const playBtn = document.getElementById('play-btn');
+    if (currentAudioManager && currentAudioManager.config.model && currentAudioManager.config.model.startsWith('runtime:')) {
+        if (currentAudioManager.config.model === 'runtime:drum-machine') {
+            const modelEl = document.getElementById(`model${currentAudioManager.markerId.replace('marker', '')}`);
+            const drum = modelEl && modelEl.components['runtime-drum-machine'];
+            if (drum) {
+                if (currentAudioManager.isPlaying) {
+                    drum.stopPattern();
+                    currentAudioManager.isPlaying = false;
+                } else {
+                    drum.playPattern();
+                    currentAudioManager.isPlaying = true;
+                }
+                updateDockButtons();
+                return;
+            }
+        }
+        [60, 64, 67, 72].forEach((midi, index) => {
+            setTimeout(() => playRuntimeSynthMidi(midi, 0.7), index * 120);
+        });
+        currentAudioManager.isPlaying = false;
+        updateDockButtons();
+        return;
+    }
+
     if (!currentAudioManager || !currentAudioManager.audio) {
         showNotification('⚠️ 请先对准乐器码');
         return;
@@ -1805,6 +3753,18 @@ function resetModel() {
     } else {
         console.error('复位失败：无法找到模型或touch-handler组件', modelId);
     }
+}
+
+function toggleModelGestureMode() {
+    if (!currentAudioManager) {
+        showNotification('⚠️ 请先对准一个乐器码');
+        return;
+    }
+    modelGestureMode = modelGestureMode === 'interact' ? 'rotate' : 'interact';
+    runtimeControlPointerActive = false;
+    const modeName = modelGestureMode === 'interact' ? '控件交互' : '整机旋转';
+    showNotification(`已切换到${modeName}模式`);
+    updateDockButtons();
 }
 
 function loadMarkdownContent(title, markdownText, markdownPath) {
@@ -1943,13 +3903,19 @@ function updateDockButtons() {
     const playBtn = document.getElementById('play-btn');
     const infoBtn = document.getElementById('info-btn');
     const resetBtn = document.getElementById('reset-btn');
+    const modeBtn = document.getElementById('mode-btn');
     
-    if (!playBtn || !infoBtn || !resetBtn) return;
+    if (!playBtn || !infoBtn || !resetBtn || !modeBtn) return;
     
     if (currentAudioManager) {
         playBtn.classList.remove('disabled');
         infoBtn.classList.remove('disabled');
         resetBtn.classList.remove('disabled');
+        modeBtn.classList.remove('disabled');
+        modeBtn.classList.toggle('rotate-mode', modelGestureMode === 'rotate');
+        modeBtn.classList.toggle('interact-mode', modelGestureMode === 'interact');
+        modeBtn.title = modelGestureMode === 'interact' ? '控件交互模式' : '整机旋转模式';
+        modeBtn.innerHTML = modelGestureMode === 'interact' ? '<span class="emoji">☝️</span>' : '<span class="emoji">🔁</span>';
         if (currentAudioManager.isPlaying) {
             playBtn.innerHTML = '<span class="emoji">⏸️</span>';
             playBtn.classList.add('playing');
@@ -1961,6 +3927,9 @@ function updateDockButtons() {
         playBtn.classList.add('disabled');
         infoBtn.classList.add('disabled');
         resetBtn.classList.add('disabled');
+        modeBtn.classList.add('disabled');
+        modeBtn.classList.remove('rotate-mode', 'interact-mode');
+        modeBtn.innerHTML = '<span class="emoji">☝️</span>';
         playBtn.innerHTML = '<span class="emoji">🎵</span>';
         playBtn.classList.remove('playing');
     }
@@ -2221,6 +4190,7 @@ document.addEventListener('DOMContentLoaded', function() {
     <div class="dock-bar">
       <button id="play-btn" class="dock-button disabled" onclick="toggleAudio()"><span class="emoji">🎵</span></button>
       <button id="info-btn" class="dock-button disabled" onclick="showInfo()"><span class="emoji">📖</span></button>
+      <button id="mode-btn" class="dock-button disabled" onclick="toggleModelGestureMode()" title="控件交互模式"><span class="emoji">☝️</span></button>
       <button id="reset-btn" class="dock-button disabled" onclick="resetModel()"><span class="emoji">🔄</span></button>
     </div>
   </div>
@@ -2244,80 +4214,11 @@ document.addEventListener('DOMContentLoaded', function() {
 <!-- ==================================================================== -->
    <!-- 所有23个Marker的完整结构 (已移除旧的 <a-torus> 加载动画) -->
    <!-- ==================================================================== -->
-   <a-marker id="marker1" type="pattern" url="assets/patterns/pattern-pipa.patt" instrument-handler>
-        <a-entity id="model1" class="playable" instrument-player o15="x:0; y:0; z:0" position="0 0 0" scale="0.03 0.03 0.03" touch-handler visible="false"></a-entity>
+   <a-marker id="marker26" type="pattern" url="assets/patterns/pattern-synth.patt" instrument-handler>
+        <a-entity id="model26" position="0 0 0" rotation="0 0 0" touch-handler="minScale: 0.45; maxScale: 2.8" visible="false"></a-entity>
    </a-marker>
-   <a-marker id="marker2" type="pattern" url="assets/patterns/pattern-hulusi.patt" instrument-handler>
-        <a-entity id="model2" class="playable" instrument-player o15="x:0; y:0; z:0" position="0 0 0" scale="0.014 0.014 0.014" touch-handler visible="false"></a-entity>
-   </a-marker>
-   <a-marker id="marker3" type="pattern" url="assets/patterns/pattern-dongbei_dagu.patt" instrument-handler>
-        <a-entity id="model3" class="playable" instrument-player o15="x:0; y:0; z:0" position="0 0 0" scale="0.03 0.03 0.03" touch-handler visible="false"></a-entity>
-   </a-marker>
-   <a-marker id="marker4" type="pattern" url="assets/patterns/pattern-dongbula.patt" instrument-handler>
-        <a-entity id="model4" class="playable" instrument-player o15="x:0; y:0; z:0" position="0 0 0" scale="0.03 0.03 0.03" touch-handler visible="false"></a-entity>
-   </a-marker>
-   <a-marker id="marker5" type="pattern" url="assets/patterns/pattern-gaohu.patt" instrument-handler>
-        <a-entity id="model5" class="playable" instrument-player o15="x:0; y:0; z:0" position="0 0 0" scale="0.03 0.03 0.03" touch-handler visible="false"></a-entity>
-   </a-marker>
-   <a-marker id="marker6" type="pattern" url="assets/patterns/pattern-huagu.patt" instrument-handler>
-        <a-entity id="model6" class="playable" instrument-player o15="x:0; y:0; z:0" position="0 0 0" scale="0.03 0.03 0.03" touch-handler visible="false"></a-entity>
-   </a-marker>
-   <a-marker id="marker7" type="pattern" url="assets/patterns/pattern-huobusi.patt" instrument-handler>
-        <a-entity id="model7" class="playable" instrument-player o15="x:0; y:0; z:0" position="0 0 0" scale="0.03 0.03 0.03" touch-handler visible="false"></a-entity>
-   </a-marker>
-   <a-marker id="marker8" type="pattern" url="assets/patterns/pattern-matouqin.patt" instrument-handler>
-        <a-entity id="model8" class="playable" instrument-player o15="x:0; y:0; z:0" position="0 0 0" scale="0.03 0.03 0.03" touch-handler visible="false"></a-entity>
-   </a-marker>
-   <a-marker id="marker9" type="pattern" url="assets/patterns/pattern-niujiaoqin.patt" instrument-handler>
-        <a-entity id="model9" class="playable" instrument-player o15="x:0; y:0; z:0" position="0 0 0" scale="0.03 0.03 0.03" touch-handler visible="false"></a-entity>
-   </a-marker>
-   <a-marker id="marker10" type="pattern" url="assets/patterns/pattern-suona.patt" instrument-handler>
-        <a-entity id="model10" class="playable" instrument-player o15="x:0; y:0; z:0" position="0 0 0" scale="0.03 0.03 0.03" touch-handler visible="false"></a-entity>
-   </a-marker>
-   <a-marker id="marker11" type="pattern" url="assets/patterns/pattern-yueqin.patt" instrument-handler>
-        <a-entity id="model11" class="playable" instrument-player o15="x:0; y:0; z:0" position="0 0 0" scale="0.03 0.03 0.03" touch-handler visible="false"></a-entity>
-   </a-marker>
-   <a-marker id="marker12" type="pattern" url="assets/patterns/pattern-chaozhou_suona.patt" instrument-handler>
-        <a-entity id="model12" class="playable" instrument-player o15="x:0; y:0; z:0" position="0 0 0" scale="0.03 0.03 0.03" touch-handler visible="false"></a-entity>
-   </a-marker>
-   <a-marker id="marker13" type="pattern" url="assets/patterns/pattern-chaozhou_zheng.patt" instrument-handler>
-        <a-entity id="model13" class="playable" instrument-player o15="x:0; y:0; z:0" position="0 0 0" scale="0.03 0.03 0.03" touch-handler visible="false"></a-entity>
-   </a-marker>
-   <a-marker id="marker14" type="pattern" url="assets/patterns/pattern-dongxiao.patt" instrument-handler>
-        <a-entity id="model14" class="playable" instrument-player o15="x:0; y:0; z:0" position="0 0 0" scale="0.03 0.03 0.03" touch-handler visible="false"></a-entity>
-   </a-marker>
-   <a-marker id="marker15" type="pattern" url="assets/patterns/pattern-houguan.patt" instrument-handler>
-        <a-entity id="model15" class="playable" instrument-player o15="x:0; y:0; z:0" position="0 0 0" scale="0.03 0.03 0.03" touch-handler visible="false"></a-entity>
-   </a-marker>
-   <a-marker id="marker16" type="pattern" url="assets/patterns/pattern-muyu.patt" instrument-handler>
-        <a-entity id="model16" class="playable" instrument-player o15="x:0; y:0; z:0" position="0 0 0" scale="0.03 0.03 0.03" touch-handler visible="false"></a-entity>
-   </a-marker>
-   <a-marker id="marker17" type="pattern" url="assets/patterns/pattern-niujiaohao.patt" instrument-handler>
-        <a-entity id="model17" class="playable" instrument-player o15="x:0; y:0; z:0" position="0 0 0" scale="0.03 0.03 0.03" touch-handler visible="false"></a-entity>
-   </a-marker>
-   <a-marker id="marker18" type="pattern" url="assets/patterns/pattern-qinqin.patt" instrument-handler>
-        <a-entity id="model18" class="playable" instrument-player o15="x:0; y:0; z:0" position="0 0 0" scale="0.03 0.03 0.03" touch-handler visible="false"></a-entity>
-   </a-marker>
-   <a-marker id="marker19" type="pattern" url="assets/patterns/pattern-yehu.patt" instrument-handler>
-        <a-entity id="model19" class="playable" instrument-player o15="x:0; y:0; z:0" position="0 0 0" scale="0.03 0.03 0.03" touch-handler visible="false"></a-entity>
-   </a-marker>
-   <a-marker id="marker20" type="pattern" url="assets/patterns/pattern-yugu.patt" instrument-handler>
-        <a-entity id="model20" class="playable" instrument-player o15="x:0; y:0; z:0" position="0 0 0" scale="0.03 0.03 0.03" touch-handler visible="false"></a-entity>
-   </a-marker>
-   <a-marker id="marker21" type="pattern" url="assets/patterns/pattern-zhuban.patt" instrument-handler>
-        <a-entity id="model21" class="playable" instrument-player o15="x:0; y:0; z:0" position="0 0 0" scale="0.03 0.03 0.03" touch-handler visible="false"></a-entity>
-   </a-marker>
-   <a-marker id="marker22" type="pattern" url="assets/patterns/pattern-huagudatong.patt" instrument-handler>
-        <a-entity id="model22" class="playable" instrument-player o15="x:0; y:0; z:0" position="0 0 0" scale="0.03 0.03 0.03" touch-handler visible="false"></a-entity>
-   </a-marker>
-    <a-marker id="marker23" type="pattern" url="assets/patterns/pattern-koubidi.patt" instrument-handler>
-        <a-entity id="model23" class="playable" instrument-player o15="x:0; y:0; z:0" position="0 0 0" scale="0.03 0.03 0.03" touch-handler visible="false"></a-entity>
-   </a-marker>
-   <a-marker id="marker24" type="pattern" url="assets/patterns/pattern-yangqin.patt" instrument-handler>
-        <a-entity id="model24" class="playable" instrument-player o15="x:0; y:0; z:0" position="0 0 0" scale="0.03 0.03 0.03" touch-handler visible="false"></a-entity>
-   </a-marker>
-   <a-marker id="marker25" type="pattern" url="assets/patterns/pattern-sanxian.patt" instrument-handler>
-        <a-entity id="model25" class="playable" instrument-player o15="x:0; y:0; z:0" position="0 0 0" scale="0.03 0.03 0.03" touch-handler visible="false"></a-entity>
+   <a-marker id="marker27" type="pattern" url="assets/patterns/pattern-drum_machine.patt" instrument-handler>
+        <a-entity id="model27" position="0 0 0" rotation="0 0 0" touch-handler="minScale: 0.45; maxScale: 2.8" visible="false"></a-entity>
    </a-marker>
    <a-entity camera cursor="rayOrigin: mouse; fuse: false" raycaster="objects: .playable"></a-entity>
   </a-scene>
