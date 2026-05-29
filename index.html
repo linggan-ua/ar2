@@ -2734,8 +2734,10 @@ AFRAME.registerComponent('runtime-synth-workstation', {
         const pointer = getRuntimeEventPointer(evt);
         const camera = this.el.sceneEl.camera;
         if (!camera) return null;
-        this.mouse.x = (pointer.x / window.innerWidth) * 2 - 1;
-        this.mouse.y = -(pointer.y / window.innerHeight) * 2 + 1;
+        const canvas = this.el.sceneEl.canvas;
+        const rect = canvas.getBoundingClientRect();
+        this.mouse.x = ((pointer.x - rect.left) / rect.width) * 2 - 1;
+        this.mouse.y = -((pointer.y - rect.top) / rect.height) * 2 + 1;
         this.raycaster.setFromCamera(this.mouse, camera);
         const hits = this.raycaster.intersectObjects(this.interactives, false);
         if (hits.length > 0) {
@@ -3141,8 +3143,10 @@ AFRAME.registerComponent('runtime-drum-machine', {
         const pointer = getRuntimeEventPointer(evt);
         const camera = this.el.sceneEl.camera;
         if (!camera) return null;
-        this.mouse.x = (pointer.x / window.innerWidth) * 2 - 1;
-        this.mouse.y = -(pointer.y / window.innerHeight) * 2 + 1;
+        const canvas = this.el.sceneEl.canvas;
+        const rect = canvas.getBoundingClientRect();
+        this.mouse.x = ((pointer.x - rect.left) / rect.width) * 2 - 1;
+        this.mouse.y = -((pointer.y - rect.top) / rect.height) * 2 + 1;
         this.raycaster.setFromCamera(this.mouse, camera);
         const hits = this.raycaster.intersectObjects(this.interactives, false);
         if (hits.length > 0) {
