@@ -2749,6 +2749,7 @@ AFRAME.registerComponent('runtime-synth-workstation', {
     },
 
     handlePointerDown: function (evt) {
+        if (!this.el.getAttribute('visible')) return;
         if (modelGestureMode !== 'interact') return;
         const hit = this.raycastInteractives(evt);
         if (!hit) return;
@@ -2793,6 +2794,7 @@ AFRAME.registerComponent('runtime-synth-workstation', {
     },
 
     handlePointerMove: function (evt) {
+        if (!this.el.getAttribute('visible')) { this.dragState = null; return; }
         if (!this.dragState) return;
         if (evt.preventDefault) evt.preventDefault();
         const pointer = getRuntimeEventPointer(evt);
@@ -2820,6 +2822,7 @@ AFRAME.registerComponent('runtime-synth-workstation', {
     },
 
     handleClick: function (evt) {
+        if (!this.el.getAttribute('visible')) return;
         if (modelGestureMode !== 'interact') return;
         if (Date.now() < this.pointerHandledUntil) return;
         const hit = this.raycastInteractives(evt);
@@ -3158,6 +3161,7 @@ AFRAME.registerComponent('runtime-drum-machine', {
     },
 
     handlePointerDown: function (evt) {
+        if (!this.el.getAttribute('visible')) return;
         if (modelGestureMode !== 'interact') return;
         const hit = this.raycastInteractives(evt);
         if (!hit) return;
@@ -3196,6 +3200,7 @@ AFRAME.registerComponent('runtime-drum-machine', {
     },
 
     handlePointerMove: function (evt) {
+        if (!this.el.getAttribute('visible')) { this.dragState = null; return; }
         if (!this.dragState) return;
         if (evt.preventDefault) evt.preventDefault();
         const pointer = getRuntimeEventPointer(evt);
@@ -3221,6 +3226,7 @@ AFRAME.registerComponent('runtime-drum-machine', {
     },
 
     handleClick: function (evt) {
+        if (!this.el.getAttribute('visible')) return;
         if (modelGestureMode !== 'interact') return;
         if (Date.now() < this.pointerHandledUntil) return;
         const hit = this.raycastInteractives(evt);
