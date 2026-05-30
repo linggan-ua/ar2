@@ -20,6 +20,19 @@
             margin: 0;
             overflow: hidden;
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            touch-action: none;
+            -webkit-user-select: none;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        a-scene,
+        canvas,
+        video {
+            touch-action: none;
+            -webkit-user-select: none;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
         }
 
         /* 启动覆盖层 - iOS/HyperOS风格高斯模糊 */
@@ -316,6 +329,7 @@
         
         #ar-scene {
             display: none;
+            touch-action: none;
         }
         
         #ar-scene.active {
@@ -1511,6 +1525,187 @@ function getRuntimePointerId(evt) {
     return source.pointerId || touch?.identifier || 1;
 }
 
+const runtimeControlEventOptions = { capture: true, passive: false };
+const runtimeControlClickOptions = { capture: true };
+const runtimeTouchHitPadding = 34;
+
+function addRuntimeControlListeners(component) {
+    window.addEventListener('pointerdown', component.handlePointerDown, runtimeControlEventOptions);
+    window.addEventListener('mousedown', component.handlePointerDown, runtimeControlEventOptions);
+    window.addEventListener('touchstart', component.handlePointerDown, runtimeControlEventOptions);
+    window.addEventListener('click', component.handleClick, runtimeControlClickOptions);
+    window.addEventListener('pointermove', component.handlePointerMove, runtimeControlEventOptions);
+    window.addEventListener('mousemove', component.handlePointerMove, runtimeControlEventOptions);
+    window.addEventListener('touchmove', component.handlePointerMove, runtimeControlEventOptions);
+    window.addEventListener('pointerup', component.handlePointerUp, runtimeControlEventOptions);
+    window.addEventListener('mouseup', component.handlePointerUp, runtimeControlEventOptions);
+    window.addEventListener('touchend', component.handlePointerUp, runtimeControlEventOptions);
+    window.addEventListener('pointercancel', component.handlePointerUp, runtimeControlEventOptions);
+    window.addEventListener('touchcancel', component.handlePointerUp, runtimeControlEventOptions);
+}
+
+function removeRuntimeControlListeners(component) {
+    window.removeEventListener('pointerdown', component.handlePointerDown, runtimeControlEventOptions);
+    window.removeEventListener('mousedown', component.handlePointerDown, runtimeControlEventOptions);
+    window.removeEventListener('touchstart', component.handlePointerDown, runtimeControlEventOptions);
+    window.removeEventListener('click', component.handleClick, runtimeControlClickOptions);
+    window.removeEventListener('pointermove', component.handlePointerMove, runtimeControlEventOptions);
+    window.removeEventListener('mousemove', component.handlePointerMove, runtimeControlEventOptions);
+    window.removeEventListener('touchmove', component.handlePointerMove, runtimeControlEventOptions);
+    window.removeEventListener('pointerup', component.handlePointerUp, runtimeControlEventOptions);
+    window.removeEventListener('mouseup', component.handlePointerUp, runtimeControlEventOptions);
+    window.removeEventListener('touchend', component.handlePointerUp, runtimeControlEventOptions);
+    window.removeEventListener('pointercancel', component.handlePointerUp, runtimeControlEventOptions);
+    window.removeEventListener('touchcancel', component.handlePointerUp, runtimeControlEventOptions);
+}
+
+function getRuntimeCanvasRect(sceneEl) {
+    const canvas = sceneEl && (sceneEl.canvas || (sceneEl.renderer && sceneEl.renderer.domElement));
+    const rect = canvas && canvas.getBoundingClientRect();
+    if (rect && rect.width > 0 && rect.height > 0) {
+        return rect;
+    }
+    return {
+        left: 0,
+        top: 0,
+        width: window.innerWidth || document.documentElement.clientWidth || 1,
+        height: window.innerHeight || document.documentElement.clientHeight || 1
+    };
+}
+
+function prepareRuntimeCameraForRaycast(camera) {
+    if (!camera) return false;
+    if (!camera.isPerspectiveCamera && !camera.isOrthographicCamera) {
+        camera.isPerspectiveCamera = true;
+    }
+    if (!camera.projectionMatrixInverse && typeof THREE !== 'undefined' && THREE.Matrix4) {
+        camera.projectionMatrixInverse = new THREE.Matrix4();
+    }
+    if (camera.projectionMatrix && camera.projectionMatrixInverse && camera.projectionMatrixInverse.copy) {
+        camera.projectionMatrixInverse.copy(camera.projectionMatrix).invert();
+    }
+    camera.updateMatrixWorld(true);
+    return Boolean(camera.isPerspectiveCamera || camera.isOrthographicCamera);
+}
+
+function setRuntimeRaycasterFromEvent(raycaster, mouse, sceneEl, camera, evt) {
+    const pointer = getRuntimeEventPointer(evt);
+    const canvasRect = getRuntimeCanvasRect(sceneEl);
+    mouse.x = ((pointer.x - canvasRect.left) / canvasRect.width) * 2 - 1;
+    mouse.y = -((pointer.y - canvasRect.top) / canvasRect.height) * 2 + 1;
+    sceneEl.object3D.updateMatrixWorld(true);
+    prepareRuntimeCameraForRaycast(camera);
+    raycaster.setFromCamera(mouse, camera);
+    return { pointer, canvasRect };
+}
+
+function getRuntimeInteractionObject(object) {
+    let current = object;
+    while (current) {
+        if (current.userData && current.userData.interaction) {
+            return current;
+        }
+        current = current.parent;
+    }
+    return null;
+}
+
+function getRuntimeRaycastHit(raycaster, interactives) {
+    const hits = raycaster.intersectObjects(interactives, true);
+    for (let i = 0; i < hits.length; i++) {
+        const object = getRuntimeInteractionObject(hits[i].object);
+        if (object) {
+            return { object, interaction: object.userData.interaction, point: hits[i].point };
+        }
+    }
+    return null;
+}
+
+function isRuntimeObjectVisible(object) {
+    let current = object;
+    while (current) {
+        if (current.visible === false) return false;
+        current = current.parent;
+    }
+    return true;
+}
+
+function getRuntimeObjectScreenBox(object, camera, canvasRect) {
+    if (!object || !object.geometry || !isRuntimeObjectVisible(object)) return null;
+    if (!object.geometry.boundingBox) {
+        object.geometry.computeBoundingBox();
+    }
+    const box = object.geometry.boundingBox;
+    if (!box) return null;
+
+    object.updateWorldMatrix(true, false);
+    const corners = [
+        new THREE.Vector3(box.min.x, box.min.y, box.min.z),
+        new THREE.Vector3(box.min.x, box.min.y, box.max.z),
+        new THREE.Vector3(box.min.x, box.max.y, box.min.z),
+        new THREE.Vector3(box.min.x, box.max.y, box.max.z),
+        new THREE.Vector3(box.max.x, box.min.y, box.min.z),
+        new THREE.Vector3(box.max.x, box.min.y, box.max.z),
+        new THREE.Vector3(box.max.x, box.max.y, box.min.z),
+        new THREE.Vector3(box.max.x, box.max.y, box.max.z)
+    ];
+
+    let left = Infinity;
+    let right = -Infinity;
+    let top = Infinity;
+    let bottom = -Infinity;
+    let minZ = Infinity;
+    let maxZ = -Infinity;
+
+    for (const corner of corners) {
+        corner.applyMatrix4(object.matrixWorld).project(camera);
+        if (!Number.isFinite(corner.x) || !Number.isFinite(corner.y) || !Number.isFinite(corner.z)) {
+            return null;
+        }
+        const x = canvasRect.left + (corner.x + 1) * 0.5 * canvasRect.width;
+        const y = canvasRect.top + (1 - corner.y) * 0.5 * canvasRect.height;
+        left = Math.min(left, x);
+        right = Math.max(right, x);
+        top = Math.min(top, y);
+        bottom = Math.max(bottom, y);
+        minZ = Math.min(minZ, corner.z);
+        maxZ = Math.max(maxZ, corner.z);
+    }
+
+    if (maxZ < -1 || minZ > 1) return null;
+    return {
+        left,
+        right,
+        top,
+        bottom,
+        centerX: (left + right) / 2,
+        centerY: (top + bottom) / 2,
+        area: Math.max(1, (right - left) * (bottom - top))
+    };
+}
+
+function isPointerInsideRuntimeBox(pointer, box, padding = runtimeTouchHitPadding) {
+    return pointer.x >= box.left - padding &&
+        pointer.x <= box.right + padding &&
+        pointer.y >= box.top - padding &&
+        pointer.y <= box.bottom + padding;
+}
+
+function findRuntimeScreenSpaceHit(interactives, camera, canvasRect, pointer) {
+    let best = null;
+    for (const object of interactives) {
+        const box = getRuntimeObjectScreenBox(object, camera, canvasRect);
+        if (!box || !isPointerInsideRuntimeBox(pointer, box)) continue;
+        const dx = pointer.x - box.centerX;
+        const dy = pointer.y - box.centerY;
+        const score = Math.sqrt(dx * dx + dy * dy) + box.area * 0.0005;
+        if (!best || score < best.score) {
+            best = { object, interaction: object.userData.interaction, point: null, score };
+        }
+    }
+    return best ? { object: best.object, interaction: best.interaction, point: best.point } : null;
+}
+
 function ensureAudio() {
     if (audioCtx) return audioCtx;
     const Ctx = window.AudioContext || window.webkitAudioContext;
@@ -2349,13 +2544,7 @@ AFRAME.registerComponent('runtime-synth-workstation', {
         this.handlePointerMove = this.handlePointerMove.bind(this);
         this.handlePointerUp = this.handlePointerUp.bind(this);
         this.el.classList.add('playable');
-        document.addEventListener('mousedown', this.handlePointerDown);
-        document.addEventListener('touchstart', this.handlePointerDown, { passive: false });
-        document.addEventListener('click', this.handleClick);
-        document.addEventListener('mousemove', this.handlePointerMove);
-        document.addEventListener('touchmove', this.handlePointerMove, { passive: false });
-        document.addEventListener('mouseup', this.handlePointerUp);
-        document.addEventListener('touchend', this.handlePointerUp);
+        addRuntimeControlListeners(this);
         this.build();
     },
 
@@ -2732,26 +2921,27 @@ AFRAME.registerComponent('runtime-synth-workstation', {
     },
 
     raycastInteractives: function (evt) {
-        const pointer = getRuntimeEventPointer(evt);
         const camera = this.el.sceneEl.camera;
         if (!camera) return null;
-        this.mouse.x = (pointer.x / window.innerWidth) * 2 - 1;
-        this.mouse.y = -(pointer.y / window.innerHeight) * 2 + 1;
-        this.raycaster.setFromCamera(this.mouse, camera);
-        this.el.object3D.updateMatrixWorld();
-        const hits = this.raycaster.intersectObjects(this.interactives, false);
-        for (let i = 0; i < hits.length; i++) {
-            const obj = hits[i].object;
-            const it = obj.userData && obj.userData.interaction;
-            if (it) return { object: obj, interaction: it, point: hits[i].point };
+        this.el.object3D.updateMatrixWorld(true);
+        const { pointer, canvasRect } = setRuntimeRaycasterFromEvent(this.raycaster, this.mouse, this.el.sceneEl, camera, evt);
+        const rayHit = getRuntimeRaycastHit(this.raycaster, this.interactives);
+        if (rayHit) {
+            const rayHitBox = getRuntimeObjectScreenBox(rayHit.object, camera, canvasRect);
+            if (!rayHitBox || isPointerInsideRuntimeBox(pointer, rayHitBox, runtimeTouchHitPadding * 1.6)) {
+                return rayHit;
+            }
         }
-        return null;
+        return findRuntimeScreenSpaceHit(this.interactives, camera, canvasRect, pointer) || rayHit;
     },
 
     handlePointerDown: function (evt) {
         if (!this.el.getAttribute('visible')) return;
         if (modelGestureMode !== 'interact') return;
         if (!this.raycaster || !this.mouse) { console.warn('raycaster/mouse not ready'); return; }
+        if (Date.now() < this.pointerHandledUntil && (evt.type === 'touchstart' || evt.type === 'mousedown')) return;
+        const pointer = getRuntimeEventPointer(evt);
+        const pointerId = getRuntimePointerId(evt);
         const hit = this.raycastInteractives(evt);
         if (!hit) { console.log('no hit ndc:', this.mouse.x.toFixed(2), this.mouse.y.toFixed(2), 'interactives:', this.interactives.length); return; }
         const { object, interaction } = hit;
@@ -2759,8 +2949,6 @@ AFRAME.registerComponent('runtime-synth-workstation', {
         if (evt.preventDefault) evt.preventDefault();
         runtimeControlPointerActive = true;
         this.pointerHandledUntil = Date.now() + 500;
-        const pointer = getRuntimeEventPointer(evt);
-        const pointerId = getRuntimePointerId(evt);
 
         if (interaction.kind === 'preset') return this.selectPreset(interaction.id);
         if (interaction.kind === 'wave') return this.selectWave(interaction.id);
@@ -2879,13 +3067,7 @@ AFRAME.registerComponent('runtime-synth-workstation', {
     },
 
     remove: function () {
-        document.removeEventListener('mousedown', this.handlePointerDown);
-        document.removeEventListener('touchstart', this.handlePointerDown);
-        document.removeEventListener('click', this.handleClick);
-        document.removeEventListener('mousemove', this.handlePointerMove);
-        document.removeEventListener('touchmove', this.handlePointerMove);
-        document.removeEventListener('mouseup', this.handlePointerUp);
-        document.removeEventListener('touchend', this.handlePointerUp);
+        removeRuntimeControlListeners(this);
     }
 });
 
@@ -2906,13 +3088,7 @@ AFRAME.registerComponent('runtime-drum-machine', {
         this.handlePointerMove = this.handlePointerMove.bind(this);
         this.handlePointerUp = this.handlePointerUp.bind(this);
         this.el.classList.add('playable');
-        document.addEventListener('mousedown', this.handlePointerDown);
-        document.addEventListener('touchstart', this.handlePointerDown, { passive: false });
-        document.addEventListener('click', this.handleClick);
-        document.addEventListener('mousemove', this.handlePointerMove);
-        document.addEventListener('touchmove', this.handlePointerMove, { passive: false });
-        document.addEventListener('mouseup', this.handlePointerUp);
-        document.addEventListener('touchend', this.handlePointerUp);
+        addRuntimeControlListeners(this);
         this.build();
     },
 
@@ -3144,26 +3320,27 @@ AFRAME.registerComponent('runtime-drum-machine', {
     },
 
     raycastInteractives: function (evt) {
-        const pointer = getRuntimeEventPointer(evt);
         const camera = this.el.sceneEl.camera;
         if (!camera) return null;
-        this.mouse.x = (pointer.x / window.innerWidth) * 2 - 1;
-        this.mouse.y = -(pointer.y / window.innerHeight) * 2 + 1;
-        this.raycaster.setFromCamera(this.mouse, camera);
-        this.el.object3D.updateMatrixWorld();
-        const hits = this.raycaster.intersectObjects(this.interactives, false);
-        for (let i = 0; i < hits.length; i++) {
-            const obj = hits[i].object;
-            const it = obj.userData && obj.userData.interaction;
-            if (it) return { object: obj, interaction: it, point: hits[i].point };
+        this.el.object3D.updateMatrixWorld(true);
+        const { pointer, canvasRect } = setRuntimeRaycasterFromEvent(this.raycaster, this.mouse, this.el.sceneEl, camera, evt);
+        const rayHit = getRuntimeRaycastHit(this.raycaster, this.interactives);
+        if (rayHit) {
+            const rayHitBox = getRuntimeObjectScreenBox(rayHit.object, camera, canvasRect);
+            if (!rayHitBox || isPointerInsideRuntimeBox(pointer, rayHitBox, runtimeTouchHitPadding * 1.6)) {
+                return rayHit;
+            }
         }
-        return null;
+        return findRuntimeScreenSpaceHit(this.interactives, camera, canvasRect, pointer) || rayHit;
     },
 
     handlePointerDown: function (evt) {
         if (!this.el.getAttribute('visible')) return;
         if (modelGestureMode !== 'interact') return;
         if (!this.raycaster || !this.mouse) { console.warn('raycaster/mouse not ready'); return; }
+        if (Date.now() < this.pointerHandledUntil && (evt.type === 'touchstart' || evt.type === 'mousedown')) return;
+        const pointer = getRuntimeEventPointer(evt);
+        const pointerId = getRuntimePointerId(evt);
         const hit = this.raycastInteractives(evt);
         if (!hit) { console.log('no hit ndc:', this.mouse.x.toFixed(2), this.mouse.y.toFixed(2), 'interactives:', this.interactives.length); return; }
         const { object, interaction } = hit;
@@ -3171,7 +3348,6 @@ AFRAME.registerComponent('runtime-drum-machine', {
         if (evt.preventDefault) evt.preventDefault();
         runtimeControlPointerActive = true;
         this.pointerHandledUntil = Date.now() + 500;
-        const pointer = getRuntimeEventPointer(evt);
 
         if (interaction.kind === 'drumPad') {
             if (this.activePressMesh && this.activePressMesh !== object) flashRuntimeMesh(this.activePressMesh, false, 0.018);
@@ -3266,13 +3442,7 @@ AFRAME.registerComponent('runtime-drum-machine', {
 
     remove: function () {
         this.stopPattern();
-        document.removeEventListener('mousedown', this.handlePointerDown);
-        document.removeEventListener('touchstart', this.handlePointerDown);
-        document.removeEventListener('click', this.handleClick);
-        document.removeEventListener('mousemove', this.handlePointerMove);
-        document.removeEventListener('touchmove', this.handlePointerMove);
-        document.removeEventListener('mouseup', this.handlePointerUp);
-        document.removeEventListener('touchend', this.handlePointerUp);
+        removeRuntimeControlListeners(this);
     }
 });
 
@@ -4049,8 +4219,8 @@ async function startAR() {
     (function patchARCamera() {
         var arScene = document.getElementById('ar-scene');
         var cam = arScene && arScene.camera;
-        if (cam && !cam.isPerspectiveCamera && cam.projectionMatrix && cam.projectionMatrix.elements[0] !== 0) {
-            cam.isPerspectiveCamera = true;
+        if (cam && cam.projectionMatrix && cam.projectionMatrix.elements[0] !== 0) {
+            prepareRuntimeCameraForRaycast(cam);
             console.log('Patched AR.js camera for raycaster compatibility');
         } else {
             setTimeout(patchARCamera, 500);
@@ -4276,7 +4446,8 @@ document.addEventListener('DOMContentLoaded', function() {
    <a-marker id="marker27" type="pattern" url="assets/patterns/pattern-drum_machine.patt" instrument-handler>
         <a-entity id="model27" position="0 0 0" rotation="0 0 0" touch-handler="minScale: 0.45; maxScale: 2.8" visible="false"></a-entity>
    </a-marker>
-   <a-entity camera cursor="rayOrigin: mouse; fuse: false" raycaster="objects: .playable"></a-entity>
+   <!-- <a-entity camera cursor="rayOrigin: mouse; fuse: false" raycaster="objects: .playable"></a-entity> -->
+   <a-entity camera></a-entity>
   </a-scene>
   
  </body>
